@@ -53,16 +53,19 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
   // New effect to attach stream when video element becomes available
   useEffect(() => {
     if (isWebcamActive && videoRef.current && streamRef.current) {
-        videoRef.current.srcObject = streamRef.current
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(e => console.error("Play error:", e))
-          startDetection()
-        }
+      videoRef.current.srcObject = streamRef.current
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current?.play().catch(e => console.error("Play error:", e))
+        startDetection()
+      }
     }
   }, [isWebcamActive])
 
   const initializeWebcam = async () => {
     try {
+      // Check if we already have a stream to avoid double requests
+      if (streamRef.current) return
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 1920 },
@@ -71,11 +74,17 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
         },
       })
 
+      // Check if component was disabled while we were waiting
+      if (!isWebcamEnabled) {
+        stream.getTracks().forEach(t => t.stop())
+        return
+      }
+
       streamRef.current = stream
       // Set active to true to mount the video element in the DOM
       setIsWebcamActive(true)
       setError(null)
-      
+
     } catch (err) {
       console.error("Error accessing webcam:", err)
       setError("Unable to access webcam. Please check permissions.")
@@ -85,13 +94,17 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
   }
 
   const stopWebcam = () => {
+    // Explicitly stop all tracks
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current.getTracks().forEach((track) => {
+        track.stop()
+      })
       streamRef.current = null
     }
 
     if (videoRef.current) {
       videoRef.current.srcObject = null
+      videoRef.current.load() // Force reload to clear buffer
     }
 
     setIsWebcamActive(false)
@@ -113,7 +126,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       if (!isPaused && videoRef.current && canvasRef.current) {
         runDetection()
       }
-    }, 500)
+    }, 500) as unknown as NodeJS.Timeout
   }
 
   const runDetection = async () => {
@@ -263,9 +276,8 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
               </p>
             </div>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isWebcamActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}
             </div>
@@ -292,11 +304,10 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
             size="sm"
             onClick={toggleWebcam}
             disabled={camera.id !== "CAM-001"}
-            className={`${
-              isWebcamEnabled && isMainCamera
-                ? "text-green-400 hover:text-green-300"
-                : "text-slate-400 hover:text-white"
-            } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`${isWebcamEnabled && isMainCamera
+              ? "text-green-400 hover:text-green-300"
+              : "text-slate-400 hover:text-white"
+              } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
             title={camera.id !== "CAM-001" ? "Webcam only available for Main Entrance" : "Toggle webcam"}
           >
             {isWebcamEnabled && isMainCamera ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
@@ -326,9 +337,10 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
                     size="sm"
                     variant="ghost"
                     onClick={toggleWebcam}
-                    className="bg-green-500/30 hover:bg-green-500/50 text-green-300"
+                    className="bg-green-500/30 hover:bg-green-500/50 text-green-300 flex items-center gap-2"
                   >
                     <Video className="w-4 h-4" />
+                    <span className="text-xs font-semibold">Turn Off</span>
                   </Button>
                   <Button
                     size="sm"
@@ -383,19 +395,17 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
               variant="ghost"
               onClick={toggleWebcam}
               disabled={camera.id !== "CAM-001"}
-              className={`h-8 px-2 ${
-                isWebcamEnabled && isMainCamera
-                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                  : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
-              } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`h-8 px-2 ${isWebcamEnabled && isMainCamera
+                ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
+                } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
               title={camera.id !== "CAM-001" ? "Webcam only available for Main Entrance" : "Toggle webcam"}
             >
               {isWebcamEnabled && isMainCamera ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
             </Button>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isWebcamActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}
             </div>
