@@ -41,7 +41,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
   useEffect(() => {
     if (camera.status === "online" && isWebcamEnabled && camera.id === "CAM-001") {
       initializeWebcam()
-    } else if (!isWebcamEnabled) {
+    } else {
       stopWebcam()
     }
 
@@ -49,6 +49,17 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       stopWebcam()
     }
   }, [camera.status, isWebcamEnabled, camera.id])
+
+  // New effect to attach stream when video element becomes available
+  useEffect(() => {
+    if (isWebcamActive && videoRef.current && streamRef.current) {
+        videoRef.current.srcObject = streamRef.current
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => console.error("Play error:", e))
+          startDetection()
+        }
+    }
+  }, [isWebcamActive])
 
   const initializeWebcam = async () => {
     try {
@@ -61,17 +72,10 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       })
 
       streamRef.current = stream
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        setIsWebcamActive(true)
-        setError(null)
-
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play()
-          startDetection()
-        }
-      }
+      // Set active to true to mount the video element in the DOM
+      setIsWebcamActive(true)
+      setError(null)
+      
     } catch (err) {
       console.error("Error accessing webcam:", err)
       setError("Unable to access webcam. Please check permissions.")
@@ -100,7 +104,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
 
   const toggleWebcam = () => {
     if (camera.id === "CAM-001") {
-      setIsWebcamEnabled(!isWebcamEnabled)
+      setIsWebcamEnabled((prev) => !prev)
     }
   }
 
