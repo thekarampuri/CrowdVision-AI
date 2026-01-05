@@ -43,7 +43,7 @@ export default function ReportsPage() {
         const criticalAlerts = MOCK_REPORT_DATA.filter(d => d.type === "Critical").length
         const peakCount = Math.max(...MOCK_REPORT_DATA.map(d => d.peopleCount))
 
-        doc.autoTable({
+        autoTable(doc, {
             startY: 45,
             head: [['Summary Statistic', 'Value']],
             body: [
@@ -57,10 +57,10 @@ export default function ReportsPage() {
         })
 
         // Detailed Table
-        doc.text("Detailed Activity Log", 14, doc.lastAutoTable.finalY + 10)
+        doc.text("Detailed Activity Log", 14, (doc as any).lastAutoTable.finalY + 10)
 
-        doc.autoTable({
-            startY: doc.lastAutoTable.finalY + 15,
+        autoTable(doc, {
+            startY: (doc as any).lastAutoTable.finalY + 15,
             head: [['Time', 'Type', 'Location', 'Count', 'Status']],
             body: MOCK_REPORT_DATA.map(row => [
                 row.timestamp,
