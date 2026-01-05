@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { db } from "@/lib/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,28 +11,27 @@ export async function POST(request: NextRequest) {
     }
 
     // TODO: Integrate with your ML model here
-    // This is where you'll call your pre-trained crowd detection model
-    //
-    // Expected model input: Base64 encoded image
-    // Expected model output: Array of bounding boxes with person detections
-    //
-    // Example integration:
-    // const modelResponse = await fetch('YOUR_ML_MODEL_ENDPOINT', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     image: image,
-    //     threshold: 0.5,  // Detection confidence threshold
-    //     model: 'yolov8'  // Or your specific model
-    //   })
-    // })
-    // const detections = await modelResponse.json()
-
     // For now, return mock detections
     const mockDetections = generateMockDetections()
 
     // Check if alert should be sent
     if (mockDetections.riskLevel === "high") {
+      // Store alert in Firestore
+      try {
+        await addDoc(collection(db, "alerts"), {
+          cameraId,
+          count: mockDetections.count,
+          riskLevel: mockDetections.riskLevel,
+          timestamp: serverTimestamp(), // Use server timestamp for consistency
+          acknowledged: false,
+          location: "Main Entrance", // Ideally fetched from camera config
+          message: `High risk detected: ${mockDetections.count} people`
+        })
+        console.log("Alert stored in Firestore")
+      } catch (firestoreError) {
+        console.error("Error storing alert in Firestore:", firestoreError)
+      }
+
       // Send push notification to Android app
       await sendAlertToAndroidApp({
         cameraId,
@@ -66,27 +67,7 @@ function generateMockDetections() {
 
 async function sendAlertToAndroidApp(alert: any) {
   try {
-    // TODO: Integrate with Firebase Cloud Messaging or your push notification service
-    //
-    // Example FCM integration:
-    // await fetch('https://fcm.googleapis.com/fcm/send', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `key=${process.env.FCM_SERVER_KEY}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     to: '/topics/crowdvision-alerts',  // Or specific device tokens
-    //     notification: {
-    //       title: 'High Crowd Density Alert',
-    //       body: `${alert.count} people detected at camera ${alert.cameraId}`,
-    //       icon: 'ic_alert',
-    //       sound: 'alert',
-    //     },
-    //     data: alert,
-    //   }),
-    // })
-
+    // TODO: Integrate with Firebase Cloud Messaging
     console.log("Alert sent to Android app:", alert)
   } catch (error) {
     console.error("Failed to send alert:", error)

@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from "firebase/app"
-import { getAuth } from "firebase/auth"
-import { getAnalytics } from "firebase/analytics"
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzsjC8yn3FfKrCTOU_9UAkN9Leh8rIC7E",
@@ -9,17 +9,21 @@ const firebaseConfig = {
   storageBucket: "crowdvision-ai-7e13f.firebasestorage.app",
   messagingSenderId: "1030038224372",
   appId: "1:1030038224372:web:aebdf076e33a1447ad4da1",
-  measurementId: "G-CX55SM3ZCR",
-}
+  measurementId: "G-CX55SM3ZCR"
+};
 
 // Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-const auth = getAuth(app)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
 // Initialize Analytics only on client side
-let analytics: any = null
+let analytics;
 if (typeof window !== "undefined") {
-  analytics = getAnalytics(app)
+  isSupported().then((yes) => {
+    if (yes) {
+      analytics = getAnalytics(app);
+    }
+  });
 }
 
-export { app, auth, analytics }
+export { app, db, analytics };
