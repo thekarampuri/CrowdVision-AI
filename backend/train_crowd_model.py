@@ -18,15 +18,32 @@ def train_model():
     # epochs=50: Number of training passes. Adjust as needed (e.g., 100).
     # batch=16: Batch size. Reduce if you run out of GPU memory.
     # device=0: Use GPU 0. Use 'cpu' if no GPU available.
+    # Auto-detect device and configure parameters
+    import torch
+    
+    if torch.cuda.is_available():
+        device = 0
+        batch_size = 8   # Reduced to 8 to prevent CUDA OOM on GTX 1650 (4GB VRAM)
+        workers = 4      # Use parallel workers for data loading
+        device_name = torch.cuda.get_device_name(0)
+        print(f"✅ GPU Detected: {device_name}")
+        print(f"   - Configured for GPU training (Device 0)")
+        print(f"   - Adjusted batch size to {batch_size}")
+    else:
+        device = 'cpu'
+        batch_size = 16
+        workers = 0      # Windows CPU fix
+        print("⚠️ No GPU detected. Training on CPU (this will be slow).")
+
     try:
         results = model.train(
             data=DATA_YAML,
             epochs=50,
             imgsz=640,
-            batch=16,
+            batch=batch_size,
             name="crowd_density_yolov8",
-            device='cpu',  # Using CPU as no CUDA GPU was detected
-            workers=0      # Fix for Windows process errors
+            device=device,
+            workers=workers
         )
         
         print("✅ Training completed successfully!")
@@ -35,8 +52,8 @@ def train_model():
     except Exception as e:
         print(f"❌ Training failed: {e}")
         print("\nPossible fixes:")
-        print("1. If CUDA OOM (Out of Memory), reduce 'batch' size (e.g., batch=8).")
-        print("2. If no GPU is detected, change 'device=0' to 'device=\'cpu\''.")
+        print("1. If CUDA OOM (Out of Memory), reduce 'batch' size (e.g., batch=16 or 8).")
+        print("2. Ensure PyTorch is installed with CUDA support.")
 
 if __name__ == "__main__":
     train_model()
