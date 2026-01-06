@@ -34,7 +34,14 @@ next-env.d.ts
 
 # dataset
 /Crowd density estimation.v1i.yolov8
+/ShanghaiTech_Crowd_Counting_Dataset
 
 # training runs (large model files)
 /runs
+*.pt
+*.h5
+
+# python
+__pycache__
+*.pyc
 

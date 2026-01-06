@@ -2,11 +2,11 @@ from ultralytics import YOLO
 import os
 
 # Define absolute paths to avoid confusion
-DATASET_DIR = r"E:\Projects\CrowdVision-AI\Crowd density estimation.v1i.yolov8"
-DATA_YAML = os.path.join(DATASET_DIR, "data.yaml")
+SHANGHAITECH_DIR = r"E:\Projects\CrowdVision-AI\ShanghaiTech_Crowd_Counting_Dataset"
+DATA_YAML = os.path.join(SHANGHAITECH_DIR, "data_shanghaitech_a.yaml")
 
 def train_model():
-    print(f"🚀 Starting YOLOv8 training using dataset at: {DATASET_DIR}")
+    print(f"🚀 Starting YOLOv8 training using ShanghaiTech Part A at: {SHANGHAITECH_DIR}")
     
     # 1. Load a pre-trained model
     # 'yolov8n.pt' is the smallest and fastest model (nano). 
@@ -23,8 +23,8 @@ def train_model():
     
     if torch.cuda.is_available():
         device = 0
-        batch_size = 8   # Reduced to 8 to prevent CUDA OOM on GTX 1650 (4GB VRAM)
-        workers = 4      # Use parallel workers for data loading
+        batch_size = 2   # Reduced to 2 for maximum stability on 4GB VRAM
+        workers = 2      # Reduced workers to save system RAM
         device_name = torch.cuda.get_device_name(0)
         print(f"✅ GPU Detected: {device_name}")
         print(f"   - Configured for GPU training (Device 0)")
@@ -39,11 +39,12 @@ def train_model():
         results = model.train(
             data=DATA_YAML,
             epochs=50,
-            imgsz=640,
+            imgsz=480,       # Reduced from 640 to 480 to save VRAM
             batch=batch_size,
             name="crowd_density_yolov8",
             device=device,
-            workers=workers
+            workers=workers,
+            plots=False      # Disable plotting to bypass 'PyDataFrame' error
         )
         
         print("✅ Training completed successfully!")
