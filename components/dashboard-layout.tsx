@@ -4,8 +4,9 @@ import type React from "react"
 
 import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
+import { useTheme } from "@/lib/theme-context"
 import { Button } from "@/components/ui/button"
-import { Scan, LayoutDashboard, Camera, Map, BarChart3, Bell, Settings, Menu, X, LogOut, History, FileText } from "lucide-react"
+import { Scan, LayoutDashboard, Camera, Map, BarChart3, Bell, Settings, Menu, X, LogOut, History, FileText, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -24,6 +25,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const handleLogout = async () => {
@@ -32,7 +34,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 light:from-slate-50 light:via-blue-50 light:to-slate-100">
       {/* Background elements */}
       <div className="fixed inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
@@ -124,9 +126,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4 ml-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="glass rounded-full w-10 h-10 hover:bg-white/10 transition-all"
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5 text-yellow-400 transition-transform hover:rotate-12" />
+                ) : (
+                  <Moon className="w-5 h-5 text-blue-600 transition-transform hover:-rotate-12" />
+                )}
+              </Button>
               <div className="flex items-center gap-2 glass rounded-full px-4 py-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-sm text-slate-300">System Active</span>
+                <span className="text-sm text-slate-300 dark:text-slate-300 light:text-slate-700">System Active</span>
               </div>
             </div>
           </div>
