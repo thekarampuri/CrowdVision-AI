@@ -56,30 +56,6 @@ const mockCameras = [
     latitude: 28.6145,
     longitude: 77.21,
   },
-  {
-    id: "CAM-005",
-    name: "Conference Room",
-    location: "Building A - 3rd Floor",
-    status: "online" as const,
-    peopleCount: 67,
-    riskLevel: "low" as const,
-    fps: 30,
-    resolution: "1280x720",
-    latitude: 28.614,
-    longitude: 77.2092,
-  },
-  {
-    id: "CAM-006",
-    name: "Library",
-    location: "Building D - Ground Floor",
-    status: "offline" as const,
-    peopleCount: 0,
-    riskLevel: "low" as const,
-    fps: 0,
-    resolution: "1920x1080",
-    latitude: 28.6138,
-    longitude: 77.2098,
-  },
 ]
 
 export default function CamerasPage() {
@@ -192,7 +168,7 @@ export default function CamerasPage() {
         </div>
 
         {/* Camera Grid/List */}
-        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
           {filteredCameras.map((camera) => (
             <WebcamFeed key={camera.id} camera={camera} viewMode={viewMode} onDetectionUpdate={handleDetectionUpdate} />
           ))}
