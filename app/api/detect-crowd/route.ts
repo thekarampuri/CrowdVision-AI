@@ -4,64 +4,86 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export async function POST(request: NextRequest) {
   try {
-    const { image, cameraId } = await request.json()
+    const body = await request.json()
+    const { image, cameraId } = body
+
+    console.log(`[API] --- New Request ---`)
+    console.log(`[API] Camera: ${cameraId}`)
+    console.log(`[API] Image size: ${Math.round(image?.length / 1024)} KB`)
 
     if (!image) {
+      console.error("[API] Error: No image provided")
       return NextResponse.json({ error: "No image provided" }, { status: 400 })
     }
 
     // 2. Call the Python ML Inference Server
-    const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image, cameraId })
-    })
+    console.log("[API] Forwarding to Python inference server (127.0.0.1:5000)...")
 
-    if (!mlResponse.ok) {
-      throw new Error(`Inference server responded with ${mlResponse.status}`)
-    }
+    try {
+      const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image, cameraId }),
+        cache: 'no-store'
+      })
 
-    const mlDetections = await mlResponse.json()
+      console.log(`[API] ML Server responded with status: ${mlResponse.status}`)
 
-    // 3. Check if alert should be sent
-    if (mlDetections.riskLevel === "high") {
-      // Store alert in Firestore
-      try {
-        await addDoc(collection(db, "alerts"), {
+      if (!mlResponse.ok) {
+        const errorText = await mlResponse.text()
+        console.error(`[API] ML Server error: ${errorText}`)
+        return NextResponse.json({ error: "ML Server Error" }, { status: mlResponse.status })
+      }
+
+      const mlDetections = await mlResponse.json()
+      console.log(`[API] Detection Result: ${mlDetections.count} people, risk: ${mlDetections.riskLevel}`)
+
+      // 3. Handle Alerts
+      if (mlDetections.riskLevel === "high") {
+        try {
+          await addDoc(collection(db, "alerts"), {
+            cameraId,
+            count: mlDetections.count,
+            riskLevel: mlDetections.riskLevel,
+            timestamp: serverTimestamp(),
+            acknowledged: false,
+            location: "Main Entrance",
+            message: `High risk detected: ${mlDetections.count} people`
+          })
+          console.log("[API] Alert stored in Firestore")
+        } catch (firestoreError) {
+          console.error("[API] Firestore Error:", firestoreError)
+        }
+
+        await sendAlertToAndroidApp({
           cameraId,
           count: mlDetections.count,
           riskLevel: mlDetections.riskLevel,
-          timestamp: serverTimestamp(),
-          acknowledged: false,
-          location: "Main Entrance", // Ideally fetched from camera config
-          message: `High risk detected: ${mlDetections.count} people`
+          timestamp: new Date().toISOString(),
         })
-        console.log("Alert stored in Firestore")
-      } catch (firestoreError) {
-        console.error("Error storing alert in Firestore:", firestoreError)
       }
 
-      // Send push notification
-      await sendAlertToAndroidApp({
-        cameraId,
-        count: mlDetections.count,
-        riskLevel: mlDetections.riskLevel,
-        timestamp: new Date().toISOString(),
-      })
+      return NextResponse.json(mlDetections)
+
+    } catch (fetchError: any) {
+      console.error("[API] Failed to connect to Python server:", fetchError.message)
+      return NextResponse.json({
+        error: "ML Server Connection Failed",
+        details: fetchError.message
+      }, { status: 503 })
     }
 
-    return NextResponse.json(mlDetections)
-  } catch (error) {
-    console.error("Detection API error:", error)
-    return NextResponse.json({ error: "Detection failed" }, { status: 500 })
+  } catch (error: any) {
+    console.error("[API] Global Route Error:", error.message)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
 async function sendAlertToAndroidApp(alert: any) {
   try {
-    // TODO: Integrate with Firebase Cloud Messaging
-    console.log("Alert sent to Android app:", alert)
+    console.log("[API] Sending alert to app:", alert.riskLevel)
+    // FCM implementation would go here
   } catch (error) {
-    console.error("Failed to send alert:", error)
+    console.error("[API] Push Notification Error:", error)
   }
 }

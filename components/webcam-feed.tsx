@@ -67,11 +67,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       if (streamRef.current) return
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          facingMode: "user",
-        },
+        video: true, // Simplified constraints for better compatibility
       })
 
       // Check if component was disabled while we were waiting
@@ -156,8 +152,12 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       }
 
       drawBoundingBoxes(ctx, result.boundingBoxes, canvas.width, canvas.height)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Detection error:", err)
+      // Only set error if it's not a temporary network issue
+      if (err.message !== "Failed to fetch") {
+        setError(`ML Error: ${err.message}`)
+      }
     }
   }
 
@@ -170,7 +170,8 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       })
 
       if (!response.ok) {
-        throw new Error("Detection API failed")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `API Error (${response.status})`);
       }
 
       return await response.json()
