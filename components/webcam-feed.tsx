@@ -148,6 +148,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
 
       const result = await detectCrowd(imageData)
 
+      console.log(`[ML] Camera ${camera.id} response:`, result);
       setDetections(result)
 
       if (onDetectionUpdate) {
@@ -206,14 +207,15 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
     ctx.font = "16px monospace"
     ctx.fillStyle = "#00ffff"
 
-    boxes.forEach((box, i) => {
+    boxes.forEach((box: any, i) => {
       const x = box.x * canvasWidth
       const y = box.y * canvasHeight
       const width = box.width * canvasWidth
       const height = box.height * canvasHeight
 
       ctx.strokeRect(x, y, width, height)
-      ctx.fillText(`P${i + 1}`, x, y - 5)
+      const label = box.confidence ? `P${i + 1} (${Math.round(box.confidence * 100)}%)` : `P${i + 1}`
+      ctx.fillText(label, x, y - 5)
     })
   }
 

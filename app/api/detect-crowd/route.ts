@@ -10,59 +10,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 })
     }
 
-    // TODO: Integrate with your ML model here
-    // For now, return mock detections
-    const mockDetections = generateMockDetections()
+    // 2. Call the Python ML Inference Server
+    const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, cameraId })
+    })
 
-    // Check if alert should be sent
-    if (mockDetections.riskLevel === "high") {
+    if (!mlResponse.ok) {
+      throw new Error(`Inference server responded with ${mlResponse.status}`)
+    }
+
+    const mlDetections = await mlResponse.json()
+
+    // 3. Check if alert should be sent
+    if (mlDetections.riskLevel === "high") {
       // Store alert in Firestore
       try {
         await addDoc(collection(db, "alerts"), {
           cameraId,
-          count: mockDetections.count,
-          riskLevel: mockDetections.riskLevel,
-          timestamp: serverTimestamp(), // Use server timestamp for consistency
+          count: mlDetections.count,
+          riskLevel: mlDetections.riskLevel,
+          timestamp: serverTimestamp(),
           acknowledged: false,
           location: "Main Entrance", // Ideally fetched from camera config
-          message: `High risk detected: ${mockDetections.count} people`
+          message: `High risk detected: ${mlDetections.count} people`
         })
         console.log("Alert stored in Firestore")
       } catch (firestoreError) {
         console.error("Error storing alert in Firestore:", firestoreError)
       }
 
-      // Send push notification to Android app
+      // Send push notification
       await sendAlertToAndroidApp({
         cameraId,
-        count: mockDetections.count,
-        riskLevel: mockDetections.riskLevel,
+        count: mlDetections.count,
+        riskLevel: mlDetections.riskLevel,
         timestamp: new Date().toISOString(),
       })
     }
 
-    return NextResponse.json(mockDetections)
+    return NextResponse.json(mlDetections)
   } catch (error) {
     console.error("Detection API error:", error)
     return NextResponse.json({ error: "Detection failed" }, { status: 500 })
   }
-}
-
-function generateMockDetections() {
-  const count = Math.floor(Math.random() * 15) + 1
-  const boundingBoxes = Array.from({ length: count }, () => ({
-    x: Math.random() * 0.7 + 0.1,
-    y: Math.random() * 0.6 + 0.1,
-    width: 0.08 + Math.random() * 0.06,
-    height: 0.12 + Math.random() * 0.1,
-    confidence: 0.7 + Math.random() * 0.3,
-  }))
-
-  let riskLevel: "low" | "medium" | "high" = "low"
-  if (count > 10) riskLevel = "high"
-  else if (count > 6) riskLevel = "medium"
-
-  return { count, riskLevel, boundingBoxes }
 }
 
 async function sendAlertToAndroidApp(alert: any) {
