@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Futuristic glassmorphism theme with cyber-blue accents */
-  --background: oklch(0.15 0.02 240);
+  /* Default to dark theme - Futuristic glassmorphism with cyber-blue accents */
+  --background: oklch(0.12 0.02 240);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.18 0.03 240 / 0.4);
   --card-foreground: oklch(0.98 0 0);
