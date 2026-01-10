@@ -80,7 +80,7 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
   }
 
   return (
-    <div className="relative w-full h-[600px] bg-slate-900">
+    <div className="relative w-full h-[600px] bg-muted">
       {/* Simulated map background */}
       <div className="absolute inset-0">
         <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
@@ -131,13 +131,12 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
               >
                 {/* Coverage radius */}
                 <div
-                  className={`absolute rounded-full border-2 ${
-                    location.riskLevel === "high"
+                  className={`absolute rounded-full border-2 ${location.riskLevel === "high"
                       ? "border-red-400/30"
                       : location.riskLevel === "medium"
                         ? "border-yellow-400/30"
                         : "border-green-400/30"
-                  } -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2`}
+                    } -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2`}
                   style={{
                     width: `${location.radius * 2}px`,
                     height: `${location.radius * 2}px`,
@@ -182,8 +181,8 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
         <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 glass-strong rounded-2xl p-4 border border-white/10">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="text-white font-semibold text-lg">{selectedCamera.name}</h3>
-              <p className="text-slate-400 text-sm">{selectedCamera.id}</p>
+              <h3 className="text-foreground font-semibold text-lg">{selectedCamera.name}</h3>
+              <p className="text-muted-foreground text-sm">{selectedCamera.id}</p>
             </div>
             <button
               onClick={() => setSelectedCamera(null)}
@@ -195,34 +194,33 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-sm flex items-center gap-2">
+              <span className="text-muted-foreground text-sm flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 People Detected
               </span>
-              <span className="text-white font-semibold">{selectedCamera.peopleCount}</span>
+              <span className="text-foreground font-semibold">{selectedCamera.peopleCount}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-sm flex items-center gap-2">
+              <span className="text-muted-foreground text-sm flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" />
                 Risk Level
               </span>
               <span
-                className={`font-semibold ${
-                  selectedCamera.riskLevel === "high"
+                className={`font-semibold ${selectedCamera.riskLevel === "high"
                     ? "text-red-400"
                     : selectedCamera.riskLevel === "medium"
                       ? "text-yellow-400"
                       : "text-green-400"
-                }`}
+                  }`}
               >
                 {selectedCamera.riskLevel.toUpperCase()}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-sm">Coverage Radius</span>
-              <span className="text-white font-semibold">{selectedCamera.radius}m</span>
+              <span className="text-muted-foreground text-sm">Coverage Radius</span>
+              <span className="text-foreground font-semibold">{selectedCamera.radius}m</span>
             </div>
 
             <button className="w-full mt-2 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all">
@@ -235,7 +233,7 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
       {/* Stats overlay */}
       <div className="absolute top-4 left-4 flex flex-col gap-2">
         <div className="glass-strong rounded-xl px-4 py-3">
-          <div className="text-slate-400 text-xs mb-1">Total Cameras</div>
+          <div className="text-muted-foreground text-xs mb-1">Total Cameras</div>
           <div className="text-white text-2xl font-bold">{filteredLocations.length}</div>
         </div>
         <div className="glass-strong rounded-xl px-4 py-3">

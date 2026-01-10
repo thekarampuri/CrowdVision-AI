@@ -229,7 +229,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       case "high":
         return { bg: "from-red-500/20 to-orange-500/20", border: "border-red-500/50", text: "text-red-400" }
       default:
-        return { bg: "from-slate-500/20 to-slate-600/20", border: "border-slate-500/50", text: "text-slate-400" }
+        return { bg: "from-slate-500/20 to-slate-600/20", border: "border-slate-500/50", text: "text-muted-foreground" }
     }
   }
 
@@ -251,7 +251,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
   if (viewMode === "list") {
     return (
       <div className={`glass-strong rounded-2xl p-4 border ${riskColors.border} flex items-center gap-4`}>
-        <div className="relative w-48 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-slate-900">
+        <div className="relative w-48 h-32 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
           {isWebcamActive && isMainCamera ? (
             <>
               <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -264,7 +264,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Camera className="w-8 h-8 text-slate-600" />
+              <Camera className="w-8 h-8 text-muted-foreground" />
             </div>
           )}
         </div>
@@ -272,8 +272,8 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
         <div className="flex-1">
           <div className="flex items-start justify-between mb-2">
             <div>
-              <h3 className="text-white font-semibold text-lg">{camera.name}</h3>
-              <p className="text-slate-400 text-sm flex items-center gap-1">
+              <h3 className="text-foreground font-semibold text-lg">{camera.name}</h3>
+              <p className="text-muted-foreground text-sm flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {camera.location}
               </p>
@@ -289,11 +289,11 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-cyan-400" />
-              <span className="text-white font-semibold">{detections?.count || 0}</span>
-              <span className="text-slate-500">people</span>
+              <span className="text-foreground font-semibold">{detections?.count || 0}</span>
+              <span className="text-muted-foreground">people</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-500">Risk:</span>
+              <span className="text-muted-foreground">Risk:</span>
               <span className={`font-semibold ${riskColors.text}`}>
                 {(detections?.riskLevel || camera.riskLevel).toUpperCase()}
               </span>
@@ -327,7 +327,7 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
 
   return (
     <div className={`glass-strong rounded-3xl overflow-hidden border ${riskColors.border}`}>
-      <div className="relative aspect-video bg-slate-900 group">
+      <div className="relative aspect-video bg-muted group">
         {isWebcamActive && isMainCamera ? (
           <>
             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
@@ -376,9 +376,9 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center">
-            <Camera className="w-12 h-12 text-slate-600 mb-2" />
-            <span className="text-slate-500 text-sm">Static Camera Feed</span>
-            <span className="text-slate-600 text-xs mt-1">(Demo mode)</span>
+            <Camera className="w-12 h-12 text-muted-foreground mb-2" />
+            <span className="text-muted-foreground text-sm">Static Camera Feed</span>
+            <span className="text-muted-foreground/70 text-xs mt-1">(Demo mode)</span>
           </div>
         )}
       </div>
@@ -386,8 +386,8 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-white font-semibold mb-1">{camera.name}</h3>
-            <p className="text-slate-400 text-sm flex items-center gap-1">
+            <h3 className="text-foreground font-semibold mb-1">{camera.name}</h3>
+            <p className="text-muted-foreground text-sm flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {camera.location}
             </p>
@@ -419,20 +419,20 @@ export function WebcamFeed({ camera, viewMode, onDetectionUpdate }: WebcamFeedPr
           <div className="glass rounded-xl p-3">
             <div className="flex items-center gap-2 mb-1">
               <Users className="w-4 h-4 text-cyan-400" />
-              <span className="text-slate-400 text-xs">Detected</span>
+              <span className="text-muted-foreground text-xs">Detected</span>
             </div>
-            <div className="text-white text-xl font-bold">{detections?.count || 0}</div>
+            <div className="text-foreground text-xl font-bold">{detections?.count || 0}</div>
           </div>
 
           <div className={`glass rounded-xl p-3 bg-gradient-to-br ${riskColors.bg}`}>
-            <div className="text-slate-400 text-xs mb-1">Risk Level</div>
+            <div className="text-muted-foreground text-xs mb-1">Risk Level</div>
             <div className={`text-xl font-bold ${riskColors.text}`}>
               {(detections?.riskLevel || camera.riskLevel).toUpperCase()}
             </div>
           </div>
         </div>
 
-        <div className="text-slate-500 text-xs font-mono flex items-center justify-between">
+        <div className="text-muted-foreground text-xs font-mono flex items-center justify-between">
           <span>{camera.id}</span>
           <span>{camera.resolution}</span>
         </div>

@@ -45,9 +45,8 @@ export function StatsCard({
 
   return (
     <div
-      className={`glass-strong rounded-3xl p-6 border ${colorClasses[color]} ${
-        highlight ? "ring-2 ring-red-500/50 animate-pulse" : ""
-      }`}
+      className={`glass-strong rounded-3xl p-6 border ${colorClasses[color]} ${highlight ? "ring-2 ring-red-500/50 animate-pulse" : ""
+        }`}
     >
       <div className="flex items-start justify-between mb-4">
         <div
@@ -64,8 +63,8 @@ export function StatsCard({
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-slate-400 text-sm font-medium">{title}</h3>
-        <div className={`text-3xl font-bold ${customValueClass || "text-white"}`}>{value}</div>
+        <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
+        <div className={`text-3xl font-bold ${customValueClass || "text-foreground"}`}>{value}</div>
         {trend && (
           <div className="flex items-center gap-2">
             {trend.value > 0 ? (
@@ -76,7 +75,7 @@ export function StatsCard({
             <span className={`text-sm ${trend.value > 0 ? "text-green-400" : "text-red-400"}`}>
               {Math.abs(trend.value)}%
             </span>
-            <span className="text-xs text-slate-500">{trend.label}</span>
+            <span className="text-xs text-muted-foreground">{trend.label}</span>
           </div>
         )}
       </div>
