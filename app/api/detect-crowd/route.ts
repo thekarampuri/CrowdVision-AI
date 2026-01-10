@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     console.log("[API] Forwarding to Python inference server (127.0.0.1:5000)...")
 
     try {
-      const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
+      const mlResponse = await fetch("http://localhost:666/api/detect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image, cameraId }),

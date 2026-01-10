@@ -79,6 +79,75 @@ def health_check():
         'timestamp': datetime.now().isoformat()
     })
 
+@app.route('/api/detect', methods=['POST'])
+def detect_crowd():
+    """
+    Crowd detection endpoint
+    Receives image data and returns detection results
+    
+    Note: This is a mock implementation. For real detection,
+    integrate with the camera feed server or YOLOv8 model.
+    """
+    try:
+        data = request.json
+        image = data.get('image')
+        camera_id = data.get('camera_id', 'unknown')
+        
+        if not image:
+            return jsonify({
+                'error': 'No image provided'
+            }), 400
+        
+        print(f"[DETECT] Processing image from camera: {camera_id}")
+        
+        # Mock detection results
+        # In production, this would call YOLOv8 model or forward to camera feed server
+        count = random.randint(0, 15)
+        
+        # Determine risk level
+        if count == 0:
+            risk_level = 'low'
+        elif count < 5:
+            risk_level = 'low'
+        elif count < 10:
+            risk_level = 'medium'
+        else:
+            risk_level = 'high'
+        
+        # Generate mock bounding boxes
+        bounding_boxes = []
+        for i in range(count):
+            bounding_boxes.append({
+                'x': random.random() * 0.7 + 0.1,
+                'y': random.random() * 0.6 + 0.1,
+                'width': 0.08 + random.random() * 0.05,
+                'height': 0.12 + random.random() * 0.08,
+                'confidence': 0.6 + random.random() * 0.4
+            })
+        
+        result = {
+            'count': count,
+            'riskLevel': risk_level,
+            'boundingBoxes': bounding_boxes,
+            'timestamp': datetime.now().isoformat(),
+            'camera_id': camera_id
+        }
+        
+        print(f"[DETECT] Result: {count} people, risk: {risk_level}")
+        
+        # Update crowd stats
+        crowd_stats['total_people'] = count
+        crowd_stats['risk_level'], _ = calculate_risk_level(count)
+        crowd_stats['last_updated'] = datetime.now().isoformat()
+        
+        return jsonify(result)
+    
+    except Exception as e:
+        print(f"[DETECT] Error: {str(e)}")
+        return jsonify({
+            'error': str(e)
+        }), 500
+
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
     """Get current crowd statistics"""
