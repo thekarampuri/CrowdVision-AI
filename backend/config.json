@@ -1,0 +1,51 @@
+{
+    "backend": {
+        "camera_feed_server": {
+            "host": "0.0.0.0",
+            "port": 999,
+            "cors_origins": "*"
+        },
+        "data_api_server": {
+            "host": "0.0.0.0",
+            "port": 666,
+            "cors_origins": "*"
+        }
+    },
+    "detection": {
+        "model_path": "yolov8m.pt",
+        "confidence_threshold": 0.5,
+        "iou_threshold": 0.45,
+        "detection_skip_frames": 2,
+        "use_cuda": true
+    },
+    "tracking": {
+        "max_disappeared": 15,
+        "max_distance": 80,
+        "proximity_threshold": 80
+    },
+    "cameras": [
+        {
+            "id": "camera_1",
+            "name": "Main Entrance",
+            "camera_id": 0,
+            "location": "Main Gate",
+            "latitude": 28.6139,
+            "longitude": 77.2090,
+            "coverage_radius": 100,
+            "threshold": 20,
+            "enabled": true
+        }
+    ],
+    "alerts": {
+        "low_threshold": 10,
+        "medium_threshold": 20,
+        "high_threshold": 30,
+        "critical_threshold": 50
+    },
+    "performance": {
+        "target_fps": 30,
+        "frame_width": 1280,
+        "frame_height": 720,
+        "jpeg_quality": 85
+    }
+}
