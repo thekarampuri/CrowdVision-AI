@@ -32,10 +32,10 @@ echo.
 REM Check if ML server dependencies are installed
 echo [1/4] Checking ML server dependencies...
 cd ml-server
-pip show ultralytics >nul 2>&1
+pip show flask >nul 2>&1
 if %errorlevel% neq 0 (
     echo [INFO] Installing ML server dependencies...
-    pip install -r requirements.txt
+    pip install flask flask-cors ultralytics opencv-python numpy
 )
 cd ..
 
@@ -51,23 +51,22 @@ echo ========================================
 echo     Starting CrowdVision AI System
 echo ========================================
 echo.
-echo [3/4] Starting ML Inference Server...
-echo [4/4] Starting Web Dashboard...
+echo [3/4] Starting ML Inference Server (port 5000)...
+echo [4/4] Starting Web Dashboard (port 3000)...
 echo.
-echo This will run both services in this window.
-echo.
-echo Press Ctrl+C to stop all services.
+echo Both services will run in background.
+echo This window will show the Next.js output.
 echo.
 echo ========================================
 echo.
 
 REM Start ML server in background
-start /B cmd /c "cd ml-server && python app.py" 2>&1
+start /B python ml-server\server.py
 
 REM Wait for ML server to start
-timeout /t 5 /nobreak >nul
+echo Waiting for ML server to initialize...
+timeout /t 8 /nobreak >nul
 
-REM Start Next.js frontend
 echo.
 echo ========================================
 echo    System Started Successfully!
@@ -76,13 +75,20 @@ echo.
 echo ML Server:      http://localhost:5000
 echo Web Dashboard:  http://localhost:3000
 echo.
-echo Opening dashboard in 5 seconds...
+echo Opening dashboard in 3 seconds...
 echo ========================================
 echo.
 
 REM Wait before opening browser
-timeout /t 5 /nobreak >nul
+timeout /t 3 /nobreak >nul
 start http://localhost:3000
 
 REM Run Next.js in foreground (keeps window open)
+echo.
+echo Starting Next.js server...
+echo Press Ctrl+C to stop all services
+echo.
 npm run dev
+
+REM When user presses Ctrl+C, cleanup
+taskkill /F /IM python.exe /FI "WINDOWTITLE eq CrowdVision*" >nul 2>&1
