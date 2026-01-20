@@ -1,5 +1,5 @@
 @echo off
-title CrowdVision AI - Complete System Launcher
+title CrowdVision AI - Complete System
 color 0A
 
 echo.
@@ -28,26 +28,46 @@ if %errorlevel% neq 0 (
 
 echo [OK] Python and Node.js detected
 echo.
-echo Starting CrowdVision AI System...
-echo.
-echo This will open TWO windows:
-echo   1. ML Inference Server (Python/Flask)
-echo   2. Web Dashboard (Next.js)
-echo.
-echo Press any key to continue...
-pause >nul
 
-REM Start ML Server in new window
+REM Check if ML server dependencies are installed
+echo [1/4] Checking ML server dependencies...
+cd ml-server
+pip show ultralytics >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [INFO] Installing ML server dependencies...
+    pip install -r requirements.txt
+)
+cd ..
+
+REM Check if Node modules are installed
+echo [2/4] Checking Node.js dependencies...
+if not exist "node_modules" (
+    echo [INFO] Installing Node.js dependencies...
+    call npm install
+)
+
 echo.
-echo [1/2] Starting ML Inference Server...
-start "CrowdVision AI - ML Server" cmd /k "cd ml-server && start_server.bat"
-timeout /t 3 /nobreak >nul
+echo ========================================
+echo     Starting CrowdVision AI System
+echo ========================================
+echo.
+echo [3/4] Starting ML Inference Server...
+echo [4/4] Starting Web Dashboard...
+echo.
+echo This will run both services in this window.
+echo.
+echo Press Ctrl+C to stop all services.
+echo.
+echo ========================================
+echo.
 
-REM Start Next.js Frontend in new window
-echo [2/2] Starting Web Dashboard...
-start "CrowdVision AI - Dashboard" cmd /k "npm run dev"
-timeout /t 2 /nobreak >nul
+REM Start ML server in background
+start /B cmd /c "cd ml-server && python app.py" 2>&1
 
+REM Wait for ML server to start
+timeout /t 5 /nobreak >nul
+
+REM Start Next.js frontend
 echo.
 echo ========================================
 echo    System Started Successfully!
@@ -56,16 +76,13 @@ echo.
 echo ML Server:      http://localhost:5000
 echo Web Dashboard:  http://localhost:3000
 echo.
-echo Both services are running in separate windows.
-echo Close those windows to stop the services.
+echo Opening dashboard in 5 seconds...
+echo ========================================
 echo.
-echo Opening dashboard in browser in 5 seconds...
-timeout /t 5 /nobreak >nul
 
-REM Open browser
+REM Wait before opening browser
+timeout /t 5 /nobreak >nul
 start http://localhost:3000
 
-echo.
-echo System is now running!
-echo.
-pause
+REM Run Next.js in foreground (keeps window open)
+npm run dev

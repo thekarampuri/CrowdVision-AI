@@ -35,9 +35,9 @@ PERSON_CLASS_ID = 0  # COCO dataset class ID for 'person'
 
 # Risk level thresholds
 RISK_THRESHOLDS = {
-    "low": (0, 10),  # 0-10 people
-    "medium": (11, 25),  # 11-25 people
-    "high": (26, 999),  # 26+ people
+    "low": (0, 10),  # 0-10 people (Safe)
+    "medium": (11, 30),  # 11-30 people (Warning)
+    "high": (31, 999),  # 31+ people (Critical)
 }
 
 
