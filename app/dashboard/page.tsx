@@ -38,7 +38,7 @@ export default function DashboardPage() {
       case "Critical":
         return "text-red-400"
       default:
-        return "text-slate-400"
+        return "text-muted-foreground"
     }
   }
 
@@ -48,12 +48,12 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Dashboard Overview</h1>
-            <p className="text-slate-400">Real-time crowd monitoring and surveillance analytics</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard Overview</h1>
+            <p className="text-muted-foreground">Real-time crowd monitoring and surveillance analytics</p>
           </div>
           <div className="glass rounded-2xl px-6 py-3 text-sm">
-            <span className="text-slate-400">Last updated:</span>
-            <span className="ml-2 text-white font-mono">{stats.lastUpdated.toLocaleTimeString()}</span>
+            <span className="text-muted-foreground">Last updated:</span>
+            <span className="ml-2 text-foreground font-mono">{stats.lastUpdated.toLocaleTimeString()}</span>
           </div>
         </div>
 
@@ -102,7 +102,7 @@ export default function DashboardPage() {
         {/* System Status */}
         <div className="glass-strong rounded-3xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-white">System Status</h2>
+            <h2 className="text-xl font-semibold text-foreground">System Status</h2>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-sm text-green-400">All Systems Operational</span>
@@ -112,38 +112,38 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="glass rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">AI Detection Engine</span>
+                <span className="text-muted-foreground text-sm">AI Detection Engine</span>
                 <Activity className="w-4 h-4 text-green-400" />
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-white font-semibold">Online</span>
+                <span className="text-foreground font-semibold">Online</span>
               </div>
-              <div className="text-xs text-slate-500">YOLOv8 Model Active</div>
+              <div className="text-xs text-muted-foreground">YOLOv8 Model Active</div>
             </div>
 
             <div className="glass rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">Backend API</span>
+                <span className="text-muted-foreground text-sm">Backend API</span>
                 <Activity className="w-4 h-4 text-green-400" />
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-white font-semibold">Connected</span>
+                <span className="text-foreground font-semibold">Connected</span>
               </div>
-              <div className="text-xs text-slate-500">WebSocket Active</div>
+              <div className="text-xs text-muted-foreground">WebSocket Active</div>
             </div>
 
             <div className="glass rounded-2xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400 text-sm">Database</span>
+                <span className="text-muted-foreground text-sm">Database</span>
                 <Activity className="w-4 h-4 text-green-400" />
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-white font-semibold">Connected</span>
+                <span className="text-foreground font-semibold">Connected</span>
               </div>
-              <div className="text-xs text-slate-500">Latency: 24ms</div>
+              <div className="text-xs text-muted-foreground">Latency: 24ms</div>
             </div>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="glass-strong rounded-3xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Recent Activity</h2>
             <div className="space-y-3">
               {[
                 { time: "2 min ago", event: "Camera 7 - High density detected", severity: "warning" },
@@ -161,17 +161,16 @@ export default function DashboardPage() {
               ].map((activity, index) => (
                 <div key={index} className="glass rounded-xl p-4 flex items-center gap-4">
                   <div
-                    className={`w-2 h-2 rounded-full ${
-                      activity.severity === "warning"
+                    className={`w-2 h-2 rounded-full ${activity.severity === "warning"
                         ? "bg-yellow-400"
                         : activity.severity === "success"
                           ? "bg-green-400"
                           : "bg-blue-400"
-                    }`}
+                      }`}
                   />
                   <div className="flex-1">
-                    <div className="text-white text-sm">{activity.event}</div>
-                    <div className="text-slate-500 text-xs">{activity.time}</div>
+                    <div className="text-foreground text-sm">{activity.event}</div>
+                    <div className="text-muted-foreground text-xs">{activity.time}</div>
                   </div>
                 </div>
               ))}
@@ -179,7 +178,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="glass-strong rounded-3xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Top Locations by Density</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Top Locations by Density</h2>
             <div className="space-y-4">
               {[
                 { name: "Main Entrance", count: 342, level: 85 },
@@ -189,18 +188,17 @@ export default function DashboardPage() {
               ].map((location, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-white">{location.name}</span>
-                    <span className="text-slate-400">{location.count} people</span>
+                    <span className="text-foreground">{location.name}</span>
+                    <span className="text-muted-foreground">{location.count} people</span>
                   </div>
                   <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
-                        location.level > 70
+                      className={`h-full rounded-full transition-all ${location.level > 70
                           ? "bg-gradient-to-r from-red-500 to-orange-500"
                           : location.level > 50
                             ? "bg-gradient-to-r from-yellow-500 to-orange-500"
                             : "bg-gradient-to-r from-green-500 to-cyan-500"
-                      }`}
+                        }`}
                       style={{ width: `${location.level}%` }}
                     />
                   </div>
