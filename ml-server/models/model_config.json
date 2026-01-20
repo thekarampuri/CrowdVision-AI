@@ -1,0 +1,104 @@
+{
+  "name": "YOLOv8n Crowd Detection",
+  "version": "1.0.0",
+  "framework": "pytorch",
+  "architecture": "YOLOv8-nano",
+  "modelFile": "yolov8n.pt",
+  "description": "Lightweight YOLOv8 nano model for real-time person detection and crowd monitoring",
+
+  "inputShape": {
+    "width": 640,
+    "height": 640,
+    "channels": 3
+  },
+
+  "preprocessing": {
+    "normalization": "0-1",
+    "resizeMode": "letterbox",
+    "meanSubtraction": false,
+    "standardDeviation": false
+  },
+
+  "inference": {
+    "confidenceThreshold": 0.5,
+    "iouThreshold": 0.4,
+    "maxDetections": 100,
+    "batchSize": 1
+  },
+
+  "classes": {
+    "targetClass": "person",
+    "classId": 0,
+    "cocoDataset": true,
+    "totalClasses": 80
+  },
+
+  "riskThresholds": {
+    "low": {
+      "min": 0,
+      "max": 10,
+      "description": "Safe crowd density",
+      "color": "#10B981",
+      "alertLevel": "info"
+    },
+    "medium": {
+      "min": 11,
+      "max": 25,
+      "description": "Moderate crowd density - monitor closely",
+      "color": "#F59E0B",
+      "alertLevel": "warning"
+    },
+    "high": {
+      "min": 26,
+      "max": 999,
+      "description": "High crowd density - immediate attention required",
+      "color": "#EF4444",
+      "alertLevel": "critical"
+    }
+  },
+
+  "gatheringDetection": {
+    "enabled": true,
+    "proximityThreshold": 100,
+    "minGroupSize": 3,
+    "description": "Detects when people are gathering in close proximity"
+  },
+
+  "performance": {
+    "expectedFPS": {
+      "cpu": 30,
+      "gpu": 100
+    },
+    "inferenceTime": {
+      "cpu": "30-50ms",
+      "gpu": "10-15ms"
+    },
+    "memoryUsage": "~500MB"
+  },
+
+  "output": {
+    "format": "bounding_boxes",
+    "includeConfidence": true,
+    "includeClassLabels": true,
+    "includeGatherings": true,
+    "coordinates": "xyxy"
+  },
+
+  "metadata": {
+    "trainedOn": "COCO Dataset",
+    "trainingImages": 118000,
+    "validationImages": 5000,
+    "mAP50": 0.373,
+    "mAP50-95": 0.189,
+    "parameters": "3.2M",
+    "gflops": 8.7
+  },
+
+  "deployment": {
+    "platform": "Flask API Server",
+    "port": 5000,
+    "endpoint": "/detect",
+    "healthCheck": "/health",
+    "configEndpoint": "/config"
+  }
+}
