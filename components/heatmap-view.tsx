@@ -128,10 +128,10 @@ export function HeatmapView({
   const getDynamicColor = (peopleCount: number | undefined) => {
     if (!peopleCount || peopleCount === 0) {
       return "#22c55e"; // Green for 0 people
-    } else if (peopleCount >= 1 && peopleCount <= 10) {
-      return "#eab308"; // Yellow for 1-10 people
+    } else if (peopleCount >= 1 && peopleCount <= 9) {
+      return "#eab308"; // Yellow for 1-9 people
     } else {
-      return "#ef4444"; // Red for >10 people
+      return "#ef4444"; // Red for 10+ people
     }
   };
 

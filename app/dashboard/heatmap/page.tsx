@@ -133,7 +133,7 @@ export default function HeatmapPage() {
               <div className="w-3 h-3 rounded-full bg-yellow-400" />
               Medium Density
             </h3>
-            <p className="text-slate-400 text-sm mb-2">1-10 people detected</p>
+            <p className="text-slate-400 text-sm mb-2">1-9 people detected</p>
             <div className="text-yellow-400 text-xl font-bold">
               Monitor Zone
             </div>
@@ -144,7 +144,7 @@ export default function HeatmapPage() {
               <div className="w-3 h-3 rounded-full bg-red-400" />
               High Density
             </h3>
-            <p className="text-slate-400 text-sm mb-2">11+ people detected</p>
+            <p className="text-slate-400 text-sm mb-2">10+ people detected</p>
             <div className="text-red-400 text-xl font-bold">Alert Zone</div>
           </div>
         </div>

@@ -177,14 +177,14 @@ export function WebcamFeed({
         onDetectionUpdate(camera.id, result);
       }
 
-      // Only create HIGH RISK alerts when count > 10
+      // Only create HIGH RISK alerts when count >= 10
       // Check for existing high risk alert within last 1 minute
-      if (result.count > 10) {
+      if (result.count >= 10) {
         const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 1);
 
         if (!hasRecent) {
           try {
-            const alertId = await AlertStorage.createAlert({
+            await AlertStorage.createHighRiskAlert({
               title: `High Crowd Density - ${camera.name}`,
               description: `Critical: Crowd count has exceeded threshold with ${result.count} people detected`,
               severity: "critical",
@@ -198,16 +198,6 @@ export function WebcamFeed({
               cameraName: camera.name,
             });
 
-            // Auto-resolve after creation to move to history
-            setTimeout(async () => {
-              try {
-                await AlertStorage.resolveAlert(alertId);
-                console.log(`[ALERT] Auto-resolved alert ${alertId}`);
-              } catch (error) {
-                console.error("Error auto-resolving alert:", error);
-              }
-            }, 1000);
-
             console.log(
               `[ALERT] High risk alert created for ${camera.id} with ${result.count} people`,
             );
@@ -216,7 +206,7 @@ export function WebcamFeed({
           }
         }
       }
-      // If count is 0-10, no alert is created
+      // If count is 0-9, no alert is created
 
       drawBoundingBoxes(ctx, result.boundingBoxes, canvas.width, canvas.height);
     } catch (err: any) {
@@ -266,10 +256,11 @@ export function WebcamFeed({
       });
 
       // Calculate risk level based on count
+      // low: 0, medium: 1-9, high: 10+
       let riskLevel: "low" | "medium" | "high" = "low";
-      if (data.count > 30) {
+      if (data.count >= 10) {
         riskLevel = "high";
-      } else if (data.count >= 11) {
+      } else if (data.count >= 1 && data.count <= 9) {
         riskLevel = "medium";
       }
 

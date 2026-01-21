@@ -33,8 +33,45 @@ export interface Alert {
 }
 
 const ALERTS_COLLECTION = "alerts";
+const HIGH_RISK_ALERTS_COLLECTION = "high_risk_alerts";
 
 export class AlertStorage {
+  /**
+   * Create a new high risk alert in Firebase (separate collection)
+   */
+  static async createHighRiskAlert(
+    alertData: Omit<Alert, "id">,
+  ): Promise<string> {
+    try {
+      const alertWithTimestamp = {
+        ...alertData,
+        timestamp: Timestamp.fromDate(alertData.timestamp),
+        acknowledgedAt: alertData.acknowledgedAt
+          ? Timestamp.fromDate(alertData.acknowledgedAt)
+          : null,
+        resolvedAt: alertData.resolvedAt
+          ? Timestamp.fromDate(alertData.resolvedAt)
+          : null,
+      };
+
+      const docRef = await addDoc(
+        collection(db, HIGH_RISK_ALERTS_COLLECTION),
+        alertWithTimestamp,
+      );
+      console.log("High risk alert created with ID:", docRef.id);
+
+      // Dispatch event for real-time updates
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("alerts-updated"));
+      }
+
+      return docRef.id;
+    } catch (error) {
+      console.error("Error creating high risk alert:", error);
+      throw error;
+    }
+  }
+
   /**
    * Create a new alert in Firebase
    */
@@ -70,12 +107,12 @@ export class AlertStorage {
   }
 
   /**
-   * Get all alerts from Firebase
+   * Get all high risk alerts from Firebase
    */
   static async getAllAlerts(): Promise<Alert[]> {
     try {
       const q = query(
-        collection(db, ALERTS_COLLECTION),
+        collection(db, HIGH_RISK_ALERTS_COLLECTION),
         orderBy("timestamp", "desc"),
         limit(100),
       );
@@ -116,7 +153,7 @@ export class AlertStorage {
   static async getActiveAlerts(): Promise<Alert[]> {
     try {
       const q = query(
-        collection(db, ALERTS_COLLECTION),
+        collection(db, HIGH_RISK_ALERTS_COLLECTION),
         where("status", "in", ["active", "acknowledged"]),
         orderBy("timestamp", "desc"),
         limit(50),
@@ -157,7 +194,7 @@ export class AlertStorage {
    */
   static async acknowledgeAlert(alertId: string): Promise<void> {
     try {
-      const alertRef = doc(db, ALERTS_COLLECTION, alertId);
+      const alertRef = doc(db, HIGH_RISK_ALERTS_COLLECTION, alertId);
       await updateDoc(alertRef, {
         status: "acknowledged",
         acknowledgedAt: Timestamp.now(),
@@ -179,7 +216,7 @@ export class AlertStorage {
    */
   static async resolveAlert(alertId: string): Promise<void> {
     try {
-      const alertRef = doc(db, ALERTS_COLLECTION, alertId);
+      const alertRef = doc(db, HIGH_RISK_ALERTS_COLLECTION, alertId);
       await updateDoc(alertRef, {
         status: "resolved",
         resolvedAt: Timestamp.now(),
@@ -201,7 +238,7 @@ export class AlertStorage {
    */
   static async deleteAlert(alertId: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, ALERTS_COLLECTION, alertId));
+      await deleteDoc(doc(db, HIGH_RISK_ALERTS_COLLECTION, alertId));
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("alerts-updated"));
@@ -226,7 +263,7 @@ export class AlertStorage {
 
       // Simplified query to avoid compound index requirement
       const q = query(
-        collection(db, ALERTS_COLLECTION),
+        collection(db, HIGH_RISK_ALERTS_COLLECTION),
         where("cameraId", "==", cameraId),
         where("status", "==", "active"),
       );
@@ -258,7 +295,7 @@ export class AlertStorage {
   ): Promise<Alert[]> {
     try {
       const q = query(
-        collection(db, ALERTS_COLLECTION),
+        collection(db, HIGH_RISK_ALERTS_COLLECTION),
         where("severity", "==", severity),
         orderBy("timestamp", "desc"),
         limit(50),
@@ -325,11 +362,11 @@ export class AlertStorage {
   }
 
   /**
-   * Clear all alerts from Firebase (use with caution)
+   * Clear all high risk alerts from Firebase (use with caution)
    */
   static async clearAllAlerts(): Promise<void> {
     try {
-      const q = query(collection(db, ALERTS_COLLECTION));
+      const q = query(collection(db, HIGH_RISK_ALERTS_COLLECTION));
       const querySnapshot = await getDocs(q);
 
       const deletePromises: Promise<void>[] = [];
@@ -343,9 +380,33 @@ export class AlertStorage {
         window.dispatchEvent(new CustomEvent("alerts-updated"));
       }
 
-      console.log(`Cleared ${querySnapshot.size} alerts from Firebase`);
+      console.log(
+        `Cleared ${querySnapshot.size} high risk alerts from Firebase`,
+      );
     } catch (error) {
       console.error("Error clearing alerts:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear old alerts collection (migration helper)
+   */
+  static async clearOldAlertsCollection(): Promise<void> {
+    try {
+      const q = query(collection(db, ALERTS_COLLECTION));
+      const querySnapshot = await getDocs(q);
+
+      const deletePromises: Promise<void>[] = [];
+      querySnapshot.forEach((doc) => {
+        deletePromises.push(deleteDoc(doc.ref));
+      });
+
+      await Promise.all(deletePromises);
+
+      console.log(`Cleared ${querySnapshot.size} alerts from old collection`);
+    } catch (error) {
+      console.error("Error clearing old alerts collection:", error);
       throw error;
     }
   }

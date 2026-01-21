@@ -5,29 +5,85 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { StatsCard } from "@/components/stats-card";
 import { AlertBanner } from "@/components/alert-banner";
 import { Users, Camera, AlertTriangle, Shield, Activity } from "lucide-react";
+import { CameraStorage } from "@/lib/camera-storage";
+import { AlertStorage } from "@/lib/alert-storage";
 
 export default function DashboardPage() {
+  const [cameras, setCameras] = useState<any[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [stats, setStats] = useState({
-    totalCameras: 12,
-    activeCameras: 10,
-    totalPeople: 1847,
-    activeAlerts: 3,
-    riskLevel: "Medium" as "Safe" | "Medium" | "Critical",
+    totalCameras: 0,
+    activeCameras: 0,
+    totalPeople: 0,
+    activeAlerts: 0,
+    riskLevel: "Safe" as "Safe" | "Medium" | "Critical",
     lastUpdated: new Date(),
   });
 
-  // Simulate real-time updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStats((prev) => ({
-        ...prev,
-        totalPeople: prev.totalPeople + Math.floor(Math.random() * 20 - 10),
-        lastUpdated: new Date(),
-      }));
-    }, 3000);
+    loadData();
 
-    return () => clearInterval(interval);
+    // Listen for updates
+    const handleCamerasUpdated = () => loadData();
+    const handleAlertsUpdated = () => loadData();
+
+    window.addEventListener("cameras-updated", handleCamerasUpdated);
+    window.addEventListener("alerts-updated", handleAlertsUpdated);
+
+    // Update every 5 seconds
+    const interval = setInterval(() => {
+      loadData();
+    }, 5000);
+
+    return () => {
+      window.removeEventListener("cameras-updated", handleCamerasUpdated);
+      window.removeEventListener("alerts-updated", handleAlertsUpdated);
+      clearInterval(interval);
+    };
   }, []);
+
+  const loadData = async () => {
+    try {
+      // Load cameras
+      const allCameras = CameraStorage.getAllCameras();
+      setCameras(allCameras);
+
+      // Load active alerts
+      const activeAlerts = await AlertStorage.getActiveAlerts();
+      setAlerts(activeAlerts);
+
+      // Calculate stats
+      const totalPeople = allCameras.reduce(
+        (sum, cam) => sum + (cam.peopleCount || 0),
+        0,
+      );
+      const activeCameras = allCameras.filter(
+        (c) => c.status === "online",
+      ).length;
+      const criticalAlerts = activeAlerts.filter(
+        (a) => a.severity === "critical",
+      ).length;
+
+      // Determine overall risk level
+      let riskLevel: "Safe" | "Medium" | "Critical" = "Safe";
+      if (criticalAlerts > 0 || totalPeople >= 10) {
+        riskLevel = "Critical";
+      } else if (totalPeople >= 1 && totalPeople <= 9) {
+        riskLevel = "Medium";
+      }
+
+      setStats({
+        totalCameras: allCameras.length,
+        activeCameras: activeCameras,
+        totalPeople: totalPeople,
+        activeAlerts: activeAlerts.length,
+        riskLevel: riskLevel,
+        lastUpdated: new Date(),
+      });
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    }
+  };
 
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -67,7 +123,7 @@ export default function DashboardPage() {
         {stats.activeAlerts > 0 && (
           <AlertBanner
             count={stats.activeAlerts}
-            message="High crowd density detected in multiple zones"
+            message="High crowd density detected - check alerts page"
             severity="warning"
           />
         )}
@@ -78,14 +134,12 @@ export default function DashboardPage() {
             title="Active Cameras"
             value={`${stats.activeCameras}/${stats.totalCameras}`}
             icon={Camera}
-            trend={{ value: 2, label: "vs last hour" }}
             color="blue"
           />
           <StatsCard
             title="Total People Detected"
             value={stats.totalPeople.toLocaleString()}
             icon={Users}
-            trend={{ value: 12, label: "vs last hour" }}
             color="cyan"
             isLive
           />
@@ -154,7 +208,7 @@ export default function DashboardPage() {
                 <span className="text-foreground font-semibold">Connected</span>
               </div>
               <div className="text-xs text-muted-foreground">
-                WebSocket Active
+                Firebase Active
               </div>
             </div>
 
@@ -167,62 +221,152 @@ export default function DashboardPage() {
                 <div className="w-2 h-2 rounded-full bg-green-400" />
                 <span className="text-foreground font-semibold">Connected</span>
               </div>
-              <div className="text-xs text-muted-foreground">Latency: 24ms</div>
+              <div className="text-xs text-muted-foreground">Firestore</div>
             </div>
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Activity & Camera Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Recent Activity */}
+          <div className="glass-strong rounded-3xl p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Recent Alerts
+            </h2>
+            <div className="space-y-3">
+              {alerts.length > 0 ? (
+                alerts.slice(0, 4).map((alert, index) => {
+                  const timeAgo = Math.floor(
+                    (Date.now() - new Date(alert.timestamp).getTime()) /
+                      (1000 * 60),
+                  );
+                  return (
+                    <div
+                      key={index}
+                      className="glass rounded-xl p-4 flex items-center gap-4"
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          alert.severity === "critical"
+                            ? "bg-red-400"
+                            : alert.severity === "warning"
+                              ? "bg-yellow-400"
+                              : "bg-blue-400"
+                        }`}
+                      />
+                      <div className="flex-1">
+                        <div className="text-foreground text-sm">
+                          {alert.title}
+                        </div>
+                        <div className="text-muted-foreground text-xs">
+                          {timeAgo < 1 ? "Just now" : `${timeAgo} min ago`}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground text-sm">
+                    No recent alerts
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Camera Status */}
+          <div className="glass-strong rounded-3xl p-6">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Camera Overview
+            </h2>
+            <div className="space-y-3">
+              {cameras.slice(0, 4).map((camera, index) => {
+                const peopleCount = camera.peopleCount || 0;
+                const riskColor =
+                  peopleCount === 0
+                    ? "text-green-400"
+                    : peopleCount >= 1 && peopleCount <= 9
+                      ? "text-yellow-400"
+                      : "text-red-400";
+
+                return (
+                  <div
+                    key={index}
+                    className="glass rounded-xl p-4 flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-foreground text-sm font-medium">
+                        {camera.name}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        {camera.id}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className={`text-sm font-bold ${riskColor}`}>
+                          {peopleCount}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          people
+                        </div>
+                      </div>
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          camera.status === "online"
+                            ? "bg-green-400"
+                            : "bg-red-400"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              {cameras.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground text-sm">
+                    No cameras configured
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Risk Level Info */}
         <div className="glass-strong rounded-3xl p-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">
-            Recent Activity
+            Risk Level Information
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {[
-              {
-                time: "2 min ago",
-                event: "Camera 7 - High density detected",
-                severity: "warning",
-              },
-              {
-                time: "5 min ago",
-                event: "Camera 3 - Alert resolved",
-                severity: "success",
-              },
-              {
-                time: "12 min ago",
-                event: "Camera 12 - Maintenance scheduled",
-                severity: "info",
-              },
-              {
-                time: "18 min ago",
-                event: "Camera 5 - Normal operation resumed",
-                severity: "success",
-              },
-            ].map((activity, index) => (
-              <div
-                key={index}
-                className="glass rounded-xl p-4 flex items-center gap-4"
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    activity.severity === "warning"
-                      ? "bg-yellow-400"
-                      : activity.severity === "success"
-                        ? "bg-green-400"
-                        : "bg-blue-400"
-                  }`}
-                />
-                <div className="flex-1">
-                  <div className="text-foreground text-sm">
-                    {activity.event}
-                  </div>
-                  <div className="text-muted-foreground text-xs">
-                    {activity.time}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="glass rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+                <span className="text-foreground font-semibold">Safe</span>
               </div>
-            ))}
+              <p className="text-muted-foreground text-sm">
+                0 people detected across all cameras
+              </p>
+            </div>
+            <div className="glass rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                <span className="text-foreground font-semibold">Medium</span>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                1-9 people detected - monitoring active
+              </p>
+            </div>
+            <div className="glass rounded-xl p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <span className="text-foreground font-semibold">Critical</span>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                10+ people detected - high alert triggered
+              </p>
+            </div>
           </div>
         </div>
       </div>

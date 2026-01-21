@@ -87,21 +87,23 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <p className="text-slate-400 text-sm mb-3">
-                Clear all existing alerts from Firebase database. This will
+                Clear all high risk alerts from Firebase database. This will
                 remove all alerts from both Alerts and History pages.
               </p>
               <Button
                 onClick={async () => {
                   if (
                     confirm(
-                      "Are you sure you want to clear ALL alerts from Firebase? This cannot be undone!",
+                      "Are you sure you want to clear ALL high risk alerts from Firebase? This cannot be undone!",
                     )
                   ) {
                     try {
                       const { AlertStorage } =
                         await import("@/lib/alert-storage");
                       await AlertStorage.clearAllAlerts();
-                      alert("All alerts have been cleared successfully!");
+                      alert(
+                        "All high risk alerts have been cleared successfully!",
+                      );
                     } catch (error) {
                       console.error("Error clearing alerts:", error);
                       alert(
@@ -112,7 +114,40 @@ export default function SettingsPage() {
                 }}
                 className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
               >
-                Clear All Alerts
+                Clear All High Risk Alerts
+              </Button>
+            </div>
+
+            <div className="pt-4 border-t border-white/10">
+              <p className="text-slate-400 text-sm mb-3">
+                Delete the old "alerts" collection from Firebase. This is a
+                one-time cleanup operation.
+              </p>
+              <Button
+                onClick={async () => {
+                  if (
+                    confirm(
+                      "Are you sure you want to delete the OLD alerts collection from Firebase? This cannot be undone!",
+                    )
+                  ) {
+                    try {
+                      const { AlertStorage } =
+                        await import("@/lib/alert-storage");
+                      await AlertStorage.clearOldAlertsCollection();
+                      alert(
+                        "Old alerts collection has been deleted successfully!",
+                      );
+                    } catch (error) {
+                      console.error("Error deleting old collection:", error);
+                      alert(
+                        "Failed to delete old collection. Check console for details.",
+                      );
+                    }
+                  }
+                }}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+              >
+                Delete Old Alerts Collection
               </Button>
             </div>
           </div>
