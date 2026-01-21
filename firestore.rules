@@ -3,7 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /alerts/{alertId} {
-      allow read, write: if true; // WARNING: Set to true for development. Secure this before production!
+      allow read, write: if true;
+    }
+    match /high_risk_alerts/{alertId} {
+      allow read, write: if true;
     }
   }
 }

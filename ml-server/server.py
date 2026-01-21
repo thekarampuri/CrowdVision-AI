@@ -34,9 +34,9 @@ PERSON_CLASS_ID = 0
 
 # Risk thresholds
 RISK_THRESHOLDS = {
-    "low": (0, 10),
-    "medium": (11, 30),
-    "high": (31, 999),
+    "low": (0, 0),
+    "medium": (1, 9),
+    "high": (10, 999),
 }
 
 

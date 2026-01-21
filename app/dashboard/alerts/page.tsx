@@ -33,6 +33,7 @@ export default function AlertsPage() {
   const loadAlerts = async () => {
     setLoading(true);
     try {
+      // Fetch all alerts to include history
       const allAlerts = await AlertStorage.getAllAlerts();
       setAlerts(allAlerts);
     } catch (error) {
@@ -54,7 +55,7 @@ export default function AlertsPage() {
     try {
       if (alertId) {
         await AlertStorage.acknowledgeAlert(alertId);
-        await loadAlerts();
+        // Event will trigger reload via listener
       }
     } catch (error) {
       console.error("Error acknowledging alert:", error);
@@ -65,7 +66,7 @@ export default function AlertsPage() {
     try {
       if (alertId) {
         await AlertStorage.resolveAlert(alertId);
-        await loadAlerts();
+        // Event will trigger reload via listener
       }
     } catch (error) {
       console.error("Error resolving alert:", error);
@@ -84,10 +85,10 @@ export default function AlertsPage() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">
-              Alerts & Warnings
+              Alerts & Logs
             </h1>
             <p className="text-slate-400">
-              Real-time alert monitoring and management
+              Real-time monitoring and historical alert records
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -102,7 +103,7 @@ export default function AlertsPage() {
             <div className="glass rounded-xl px-4 py-2 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
               <span className="text-sm text-slate-300">
-                {activeCount} Active Alerts
+                {activeCount} Active
               </span>
             </div>
           </div>
@@ -169,11 +170,11 @@ export default function AlertsPage() {
                   onClick={() => setFilterStatus(status)}
                   className={
                     filterStatus === status
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md"
+                      : "text-slate-400 hover:text-white"
                   }
                 >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === "all" ? "All History" : status.charAt(0).toUpperCase() + status.slice(1)}
                 </Button>
               ),
             )}
@@ -191,11 +192,11 @@ export default function AlertsPage() {
                   className={
                     filterSeverity === severity
                       ? severity === "critical"
-                        ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                        ? "bg-red-500 text-white shadow-md"
                         : severity === "warning"
-                          ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
-                          : "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                          ? "bg-yellow-500 text-white shadow-md"
+                          : "bg-blue-500 text-white shadow-md"
+                      : "text-slate-400 hover:text-white"
                   }
                 >
                   {severity.charAt(0).toUpperCase() + severity.slice(1)}
@@ -209,7 +210,7 @@ export default function AlertsPage() {
         {loading ? (
           <div className="glass-strong rounded-3xl p-12 text-center">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-400">Loading alerts...</p>
+            <p className="text-slate-400">Syncing with database...</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -226,10 +227,10 @@ export default function AlertsPage() {
               <div className="glass-strong rounded-3xl p-12 text-center">
                 <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  No alerts found
+                  No records matching filters
                 </h3>
                 <p className="text-slate-400">
-                  All systems operating normally or try adjusting your filters
+                  Try adjusting your status or severity filters to view more logs
                 </p>
               </div>
             )}

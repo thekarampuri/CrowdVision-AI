@@ -11,19 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-interface Alert {
-  id: string;
-  title: string;
-  description: string;
-  severity: "critical" | "warning" | "info";
-  location: string;
-  cameraId: string;
-  peopleCount: number;
-  timestamp: Date;
-  status: "active" | "acknowledged" | "resolved";
-  latitude: number;
-  longitude: number;
-}
+import { Alert } from "@/lib/alert-storage";
 
 interface AlertCardProps {
   alert: Alert;
@@ -106,9 +94,8 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-4 flex-1">
             <div
-              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${styles.bg} flex items-center justify-center flex-shrink-0 ${
-                alert.severity === "critical" ? "animate-pulse" : ""
-              }`}
+              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${styles.bg} flex items-center justify-center flex-shrink-0 ${alert.severity === "critical" ? "animate-pulse" : ""
+                }`}
             >
               <AlertTriangle className={`w-6 h-6 ${styles.icon}`} />
             </div>
@@ -151,14 +138,14 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
           {alert.status === "active" && (
             <>
               <Button
-                onClick={() => onAcknowledge(alert.id)}
+                onClick={() => alert.id && onAcknowledge(alert.id)}
                 className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Acknowledge
               </Button>
               <Button
-                onClick={() => onResolve(alert.id)}
+                onClick={() => alert.id && onResolve(alert.id)}
                 className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
               >
                 Mark as Resolved
@@ -167,7 +154,7 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
           )}
           {alert.status === "acknowledged" && (
             <Button
-              onClick={() => onResolve(alert.id)}
+              onClick={() => alert.id && onResolve(alert.id)}
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
             >
               Mark as Resolved

@@ -75,6 +75,29 @@ export function WebcamFeed({
     };
   }, [camera.status, isWebcamEnabled, camera.id]);
 
+  // Handle window visibility change to stop webcam in background
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        console.log("[Webcam] Tab hidden, stopping webcam");
+        stopWebcam();
+      } else if (
+        document.visibilityState === "visible" &&
+        camera.status === "online" &&
+        isWebcamEnabled &&
+        camera.id === "CAM-001"
+      ) {
+        console.log("[Webcam] Tab visible, restarting webcam");
+        initializeWebcam();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [camera.status, isWebcamEnabled, camera.id]);
+
   // New effect to attach stream when video element becomes available
   useEffect(() => {
     if (isWebcamActive && videoRef.current && streamRef.current) {
@@ -184,9 +207,9 @@ export function WebcamFeed({
 
         if (!hasRecent) {
           try {
-            await AlertStorage.createHighRiskAlert({
-              title: `High Crowd Density - ${camera.name}`,
-              description: `Critical: Crowd count has exceeded threshold with ${result.count} people detected`,
+            const alertId = await AlertStorage.createHighRiskAlert({
+              title: `Crowd Alert - ${camera.name}`,
+              description: `Critical: Crowd count of ${result.count} people detected at ${camera.location}`,
               severity: "critical",
               location: camera.location,
               cameraId: camera.id,
@@ -199,7 +222,7 @@ export function WebcamFeed({
             });
 
             console.log(
-              `[ALERT] High risk alert created for ${camera.id} with ${result.count} people`,
+              `[ALERT] High risk alert created with ID ${alertId} for ${camera.id} with ${result.count} people`,
             );
           } catch (alertError) {
             console.error("Error creating alert:", alertError);
@@ -389,11 +412,10 @@ export function WebcamFeed({
               </p>
             </div>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isWebcamActive
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive
                   ? "bg-green-500/20 text-green-400"
                   : "bg-red-500/20 text-red-400"
-              }`}
+                }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}
             </div>
@@ -422,11 +444,10 @@ export function WebcamFeed({
             size="sm"
             onClick={toggleWebcam}
             disabled={camera.id !== "CAM-001"}
-            className={`${
-              isWebcamEnabled && isMainCamera
+            className={`${isWebcamEnabled && isMainCamera
                 ? "text-green-400 hover:text-green-300"
                 : "text-slate-400 hover:text-white"
-            } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
+              } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
             title={
               camera.id !== "CAM-001"
                 ? "Webcam only available for Main Entrance"
@@ -580,11 +601,10 @@ export function WebcamFeed({
               variant="ghost"
               onClick={toggleWebcam}
               disabled={camera.id !== "CAM-001"}
-              className={`h-8 px-2 ${
-                isWebcamEnabled && isMainCamera
+              className={`h-8 px-2 ${isWebcamEnabled && isMainCamera
                   ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
                   : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
-              } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
               title={
                 camera.id !== "CAM-001"
                   ? "Webcam only available for Main Entrance"
@@ -598,11 +618,10 @@ export function WebcamFeed({
               )}
             </Button>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isWebcamActive
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive
                   ? "bg-green-500/20 text-green-400"
                   : "bg-red-500/20 text-red-400"
-              }`}
+                }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}
             </div>

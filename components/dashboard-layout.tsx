@@ -29,8 +29,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Live Cameras", href: "/dashboard/cameras", icon: Camera },
   { name: "Heatmap", href: "/dashboard/heatmap", icon: Map },
-  { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
-  { name: "History", href: "/dashboard/history", icon: History },
+  { name: "Alerts & Logs", href: "/dashboard/alerts", icon: Bell },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -67,9 +66,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 glass-strong border-r border-white/10 z-50 transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        className={`fixed top-0 left-0 h-full w-72 glass-strong border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
       >
         <div className="flex flex-col h-full p-6">
           {/* Logo */}
@@ -102,11 +100,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   onClick={() => setSidebarOpen(false)}
                 >
                   <div
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                         ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                         : "text-slate-400 hover:text-white hover:bg-white/5"
-                    }`}
+                      }`}
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.name}</span>
