@@ -53,7 +53,7 @@ export class AlertStorage {
 
       const docRef = await addDoc(
         collection(db, ALERTS_COLLECTION),
-        alertWithTimestamp
+        alertWithTimestamp,
       );
       console.log("Alert created with ID:", docRef.id);
 
@@ -77,7 +77,7 @@ export class AlertStorage {
       const q = query(
         collection(db, ALERTS_COLLECTION),
         orderBy("timestamp", "desc"),
-        limit(100)
+        limit(100),
       );
 
       const querySnapshot = await getDocs(q);
@@ -119,7 +119,7 @@ export class AlertStorage {
         collection(db, ALERTS_COLLECTION),
         where("status", "in", ["active", "acknowledged"]),
         orderBy("timestamp", "desc"),
-        limit(50)
+        limit(50),
       );
 
       const querySnapshot = await getDocs(q);
@@ -219,20 +219,31 @@ export class AlertStorage {
    */
   static async hasRecentAlert(
     cameraId: string,
-    minutesAgo: number = 5
+    minutesAgo: number = 5,
   ): Promise<boolean> {
     try {
       const fiveMinutesAgo = new Date(Date.now() - minutesAgo * 60 * 1000);
 
+      // Simplified query to avoid compound index requirement
       const q = query(
         collection(db, ALERTS_COLLECTION),
         where("cameraId", "==", cameraId),
         where("status", "==", "active"),
-        where("timestamp", ">=", Timestamp.fromDate(fiveMinutesAgo))
       );
 
       const querySnapshot = await getDocs(q);
-      return !querySnapshot.empty;
+
+      // Filter results in memory
+      let hasRecent = false;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const alertTime = data.timestamp?.toDate() || new Date(0);
+        if (alertTime >= fiveMinutesAgo) {
+          hasRecent = true;
+        }
+      });
+
+      return hasRecent;
     } catch (error) {
       console.error("Error checking recent alerts:", error);
       return false;
@@ -243,14 +254,14 @@ export class AlertStorage {
    * Get alerts by severity
    */
   static async getAlertsBySeverity(
-    severity: "critical" | "warning" | "info"
+    severity: "critical" | "warning" | "info",
   ): Promise<Alert[]> {
     try {
       const q = query(
         collection(db, ALERTS_COLLECTION),
         where("severity", "==", severity),
         orderBy("timestamp", "desc"),
-        limit(50)
+        limit(50),
       );
 
       const querySnapshot = await getDocs(q);
