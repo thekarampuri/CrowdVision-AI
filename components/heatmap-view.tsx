@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, Users, AlertTriangle } from "lucide-react";
 import type { LatLngExpression } from "leaflet";
+import { CameraStorage, type Camera } from "@/lib/camera-storage";
 
 // Dynamic imports to avoid SSR issues with Leaflet
 const MapContainer = dynamic(
@@ -36,74 +37,40 @@ interface HeatmapViewProps {
   filterRisk: "all" | "low" | "medium" | "high";
 }
 
-const cameraLocations = [
-  {
-    id: "CAM-001",
-    name: "Main Entrance",
-    lat: 28.6139,
-    lng: 77.209,
-    peopleCount: 342,
-    riskLevel: "high" as const,
-    radius: 50,
-  },
-  {
-    id: "CAM-002",
-    name: "Food Court",
-    lat: 28.6142,
-    lng: 77.2095,
-    peopleCount: 278,
-    riskLevel: "medium" as const,
-    radius: 45,
-  },
-  {
-    id: "CAM-003",
-    name: "Parking Area",
-    lat: 28.6135,
-    lng: 77.2088,
-    peopleCount: 189,
-    riskLevel: "low" as const,
-    radius: 60,
-  },
-  {
-    id: "CAM-004",
-    name: "Exhibition Hall",
-    lat: 28.6145,
-    lng: 77.21,
-    peopleCount: 156,
-    riskLevel: "low" as const,
-    radius: 40,
-  },
-  {
-    id: "CAM-005",
-    name: "Conference Room",
-    lat: 28.614,
-    lng: 77.2092,
-    peopleCount: 67,
-    riskLevel: "low" as const,
-    radius: 30,
-  },
-];
-
 export function HeatmapView({
   showHeatmap,
   showMarkers,
   filterRisk,
 }: HeatmapViewProps) {
-  const [selectedCamera, setSelectedCamera] = useState<
-    (typeof cameraLocations)[0] | null
-  >(null);
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    loadCameras();
+
+    // Listen for camera updates
+    const handleCamerasUpdated = () => {
+      loadCameras();
+    };
+
+    window.addEventListener("cameras-updated", handleCamerasUpdated);
+    return () =>
+      window.removeEventListener("cameras-updated", handleCamerasUpdated);
   }, []);
 
-  const filteredLocations = cameraLocations.filter((loc) => {
+  const loadCameras = () => {
+    const allCameras = CameraStorage.getAllCameras();
+    setCameras(allCameras);
+  };
+
+  const filteredLocations = cameras.filter((cam) => {
     if (filterRisk === "all") return true;
-    return loc.riskLevel === filterRisk;
+    return cam.riskLevel === filterRisk;
   });
 
-  const getRiskColor = (level: string) => {
+  const getRiskColor = (level: string | undefined) => {
     switch (level) {
       case "low":
         return "#22c55e";
@@ -116,7 +83,11 @@ export function HeatmapView({
     }
   };
 
-  const mapCenter: LatLngExpression = [28.614, 77.2091];
+  // Calculate map center based on all cameras
+  const mapCenter: LatLngExpression =
+    cameras.length > 0
+      ? [cameras[0].latitude, cameras[0].longitude]
+      : [28.614, 77.2091];
 
   if (!isClient) {
     return (
@@ -139,30 +110,34 @@ export function HeatmapView({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {filteredLocations.map((location) => {
-          const position: LatLngExpression = [location.lat, location.lng];
-          const fillColor = getRiskColor(location.riskLevel);
-          const crowdRadius = location.radius * 2;
+        {filteredLocations.map((camera) => {
+          const position: LatLngExpression = [
+            camera.latitude,
+            camera.longitude,
+          ];
+          const fillColor = getRiskColor(camera.riskLevel);
+          const crowdRadius = camera.radius * 2;
 
           return (
-            <div key={location.id}>
+            <div key={camera.id}>
               {showMarkers && (
                 <Marker
                   position={position}
-                  eventHandlers={{ click: () => setSelectedCamera(location) }}
+                  eventHandlers={{ click: () => setSelectedCamera(camera) }}
                 >
                   <Popup>
                     <div className="p-2">
                       <h3 className="font-semibold text-sm mb-1">
-                        {location.name}
+                        {camera.name}
                       </h3>
-                      <p className="text-xs mb-1">ID: {location.id}</p>
+                      <p className="text-xs mb-1">ID: {camera.id}</p>
                       <p className="text-xs mb-1">
-                        People: {location.peopleCount}
+                        People: {camera.peopleCount || 0}
                       </p>
                       <p className="text-xs mb-1 capitalize">
-                        Risk: {location.riskLevel}
+                        Risk: {camera.riskLevel || "low"}
                       </p>
+                      <p className="text-xs">Location: {camera.location}</p>
                     </div>
                   </Popup>
                 </Marker>
@@ -213,7 +188,7 @@ export function HeatmapView({
                 People Detected
               </span>
               <span className="text-foreground font-semibold">
-                {selectedCamera.peopleCount}
+                {selectedCamera.peopleCount || 0}
               </span>
             </div>
 
@@ -231,7 +206,7 @@ export function HeatmapView({
                       : "text-green-400"
                 }`}
               >
-                {selectedCamera.riskLevel.toUpperCase()}
+                {(selectedCamera.riskLevel || "low").toUpperCase()}
               </span>
             </div>
 
@@ -242,6 +217,23 @@ export function HeatmapView({
               <span className="text-foreground font-semibold">
                 {selectedCamera.radius}m
               </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-sm">Location</span>
+              <span className="text-foreground text-sm">
+                {selectedCamera.location}
+              </span>
+            </div>
+
+            <div className="pt-2 border-t border-white/10">
+              <div className="text-muted-foreground text-xs mb-1">
+                Coordinates
+              </div>
+              <div className="text-foreground text-xs font-mono">
+                {selectedCamera.latitude.toFixed(4)},{" "}
+                {selectedCamera.longitude.toFixed(4)}
+              </div>
             </div>
 
             <button className="w-full mt-2 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all">
@@ -264,7 +256,10 @@ export function HeatmapView({
         <div className="glass-strong rounded-xl px-4 py-3">
           <div className="text-slate-400 text-xs mb-1">Total People</div>
           <div className="text-cyan-400 text-2xl font-bold">
-            {filteredLocations.reduce((acc, loc) => acc + loc.peopleCount, 0)}
+            {filteredLocations.reduce(
+              (acc, loc) => acc + (loc.peopleCount || 0),
+              0,
+            )}
           </div>
         </div>
       </div>

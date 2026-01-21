@@ -50,6 +50,7 @@ export function WebcamFeed({
   );
   const [detections, setDetections] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [mlServerConnected, setMlServerConnected] = useState(true);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -189,8 +190,22 @@ export function WebcamFeed({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error (${response.status})`);
+        console.warn(
+          `ML Server Error (${response.status}):`,
+          errorData.error || "API Error",
+        );
+        setMlServerConnected(false);
+        // Return default values instead of throwing
+        return {
+          count: 0,
+          riskLevel: "low",
+          boundingBoxes: [],
+          gatherings: 0,
+        };
       }
+
+      // Server responded successfully
+      setMlServerConnected(true);
 
       const data = await response.json();
 
@@ -218,9 +233,16 @@ export function WebcamFeed({
         riskLevel: riskLevel,
         boundingBoxes: boundingBoxes,
       };
-    } catch (err) {
-      console.error("ML API error:", err);
-      throw err;
+    } catch (error) {
+      console.error("Detection error:", error);
+      setMlServerConnected(false);
+      // Return default values on error instead of throwing
+      return {
+        count: 0,
+        riskLevel: "low",
+        boundingBoxes: [],
+        gatherings: 0,
+      };
     }
   };
 
@@ -454,8 +476,16 @@ export function WebcamFeed({
               </span>
             </div>
 
-            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white font-mono">
-              {camera.fps} FPS
+            <div className="absolute top-4 right-4 flex flex-col gap-2">
+              <div className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white font-mono">
+                {camera.fps} FPS
+              </div>
+              {!mlServerConnected && (
+                <div className="bg-yellow-500/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-black font-semibold flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>ML Server Offline</span>
+                </div>
+              )}
             </div>
           </>
         ) : error && isMainCamera ? (
@@ -544,7 +574,11 @@ export function WebcamFeed({
           >
             <div className="text-muted-foreground text-xs mb-1">Risk Level</div>
             <div className={`text-xl font-bold ${riskColors.text}`}>
-              {(detections?.riskLevel || camera.riskLevel).toUpperCase()}
+              {(
+                detections?.riskLevel ||
+                camera.riskLevel ||
+                "low"
+              ).toUpperCase()}
             </div>
           </div>
         </div>

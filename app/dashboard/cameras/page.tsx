@@ -1,79 +1,64 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { WebcamFeed } from "@/components/webcam-feed"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Search, Filter, Grid3x3, List } from "lucide-react"
-
-const mockCameras = [
-  {
-    id: "CAM-001",
-    name: "Main Entrance",
-    location: "Building A - Ground Floor",
-    status: "online" as const,
-    peopleCount: 342,
-    riskLevel: "high" as const,
-    fps: 30,
-    resolution: "1920x1080",
-    latitude: 28.6139,
-    longitude: 77.209,
-  },
-  {
-    id: "CAM-002",
-    name: "Food Court",
-    location: "Building B - 2nd Floor",
-    status: "online" as const,
-    peopleCount: 278,
-    riskLevel: "medium" as const,
-    fps: 30,
-    resolution: "1920x1080",
-    latitude: 28.6142,
-    longitude: 77.2095,
-  },
-  {
-    id: "CAM-003",
-    name: "Parking Area",
-    location: "Outdoor - West Wing",
-    status: "online" as const,
-    peopleCount: 189,
-    riskLevel: "low" as const,
-    fps: 25,
-    resolution: "1920x1080",
-    latitude: 28.6135,
-    longitude: 77.2088,
-  },
-  {
-    id: "CAM-004",
-    name: "Exhibition Hall",
-    location: "Building C - 1st Floor",
-    status: "online" as const,
-    peopleCount: 156,
-    riskLevel: "low" as const,
-    fps: 30,
-    resolution: "1920x1080",
-    latitude: 28.6145,
-    longitude: 77.21,
-  },
-]
+import { useState, useEffect } from "react";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { WebcamFeed } from "@/components/webcam-feed";
+import { AddCameraDialog } from "@/components/add-camera-dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, Filter, Grid3x3, List, Plus } from "lucide-react";
+import { CameraStorage, type Camera } from "@/lib/camera-storage";
 
 export default function CamerasPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filterStatus, setFilterStatus] = useState<"all" | "online" | "offline">("all")
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "online" | "offline"
+  >("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  useEffect(() => {
+    // Load cameras from storage
+    loadCameras();
+
+    // Listen for camera updates
+    const handleCamerasUpdated = () => {
+      loadCameras();
+    };
+
+    window.addEventListener("cameras-updated", handleCamerasUpdated);
+    return () =>
+      window.removeEventListener("cameras-updated", handleCamerasUpdated);
+  }, []);
+
+  const loadCameras = () => {
+    const allCameras = CameraStorage.getAllCameras();
+    setCameras(allCameras);
+  };
+
+  const handleAddCamera = (cameraData: any) => {
+    CameraStorage.addCamera(cameraData);
+    setShowAddDialog(false);
+    loadCameras();
+  };
 
   const handleDetectionUpdate = (cameraId: string, detections: any) => {
-    console.log(`[v0] Camera ${cameraId} detected ${detections.count} people with ${detections.riskLevel} risk`)
-  }
+    CameraStorage.updateCameraDetection(
+      cameraId,
+      detections.count,
+      detections.riskLevel,
+    );
+  };
 
-  const filteredCameras = mockCameras.filter((camera) => {
+  const filteredCameras = cameras.filter((camera) => {
     const matchesSearch =
       camera.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      camera.location.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterStatus === "all" || camera.status === filterStatus
-    return matchesSearch && matchesFilter
-  })
+      camera.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      filterStatus === "all" || camera.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <DashboardLayout>
@@ -81,16 +66,28 @@ export default function CamerasPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Live Camera Monitoring</h1>
-            <p className="text-slate-400">Real-time webcam feeds with AI-powered crowd detection</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Live Camera Monitoring
+            </h1>
+            <p className="text-slate-400">
+              Real-time webcam feeds with AI-powered crowd detection
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="glass rounded-xl px-4 py-2 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <span className="text-sm text-slate-300">
-                {mockCameras.filter((c) => c.status === "online").length} / {mockCameras.length} Online
+                {cameras.filter((c) => c.status === "online").length} /{" "}
+                {cameras.length} Online
               </span>
             </div>
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Camera
+            </Button>
           </div>
         </div>
 
@@ -151,7 +148,11 @@ export default function CamerasPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"}
+                className={
+                  viewMode === "grid"
+                    ? "bg-white/10 text-white"
+                    : "text-slate-400 hover:text-white"
+                }
               >
                 <Grid3x3 className="w-4 h-4" />
               </Button>
@@ -159,7 +160,11 @@ export default function CamerasPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"}
+                className={
+                  viewMode === "list"
+                    ? "bg-white/10 text-white"
+                    : "text-slate-400 hover:text-white"
+                }
               >
                 <List className="w-4 h-4" />
               </Button>
@@ -168,20 +173,43 @@ export default function CamerasPage() {
         </div>
 
         {/* Camera Grid/List */}
-        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 gap-6"
+              : "space-y-4"
+          }
+        >
           {filteredCameras.map((camera) => (
-            <WebcamFeed key={camera.id} camera={camera} viewMode={viewMode} onDetectionUpdate={handleDetectionUpdate} />
+            <WebcamFeed
+              key={camera.id}
+              camera={camera}
+              viewMode={viewMode}
+              onDetectionUpdate={handleDetectionUpdate}
+            />
           ))}
         </div>
 
         {filteredCameras.length === 0 && (
           <div className="glass-strong rounded-3xl p-12 text-center">
             <Filter className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No cameras found</h3>
-            <p className="text-slate-400">Try adjusting your search or filters</p>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No cameras found
+            </h3>
+            <p className="text-slate-400">
+              Try adjusting your search or filters
+            </p>
           </div>
+        )}
+
+        {/* Add Camera Dialog */}
+        {showAddDialog && (
+          <AddCameraDialog
+            onAdd={handleAddCamera}
+            onClose={() => setShowAddDialog(false)}
+          />
         )}
       </div>
     </DashboardLayout>
-  )
+  );
 }
