@@ -1,33 +1,32 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import type { LatLngExpression } from 'leaflet';
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import type { LatLngExpression } from "leaflet";
 
 // Dynamic imports to avoid SSR issues with Leaflet
 const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
 );
 
 const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
 );
 
 const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false },
 );
 
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 const Circle = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Circle),
-  { ssr: false }
+  () => import("react-leaflet").then((mod) => mod.Circle),
+  { ssr: false },
 );
 
 export interface CameraLocation {
@@ -35,7 +34,7 @@ export interface CameraLocation {
   name: string;
   position: [number, number];
   crowdDensity?: number;
-  status?: 'active' | 'inactive' | 'alert';
+  status?: "active" | "inactive" | "alert";
 }
 
 interface MapProps {
@@ -47,11 +46,11 @@ interface MapProps {
 }
 
 export function Map({
-  center = [28.6139, 77.2090], // Default to New Delhi
+  center = [17.6599, 75.9064], // Default to Solapur, Maharashtra
   zoom = 13,
   cameras = [],
-  height = '500px',
-  className = '',
+  height = "500px",
+  className = "",
 }: MapProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -71,11 +70,14 @@ export function Map({
   }
 
   return (
-    <div className={`rounded-lg overflow-hidden ${className}`} style={{ height }}>
+    <div
+      className={`rounded-lg overflow-hidden ${className}`}
+      style={{ height }}
+    >
       <MapContainer
         center={center}
         zoom={zoom}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: "100%", width: "100%" }}
         className="z-0"
       >
         <TileLayer
@@ -85,11 +87,11 @@ export function Map({
 
         {cameras.map((camera) => {
           const fillColor =
-            camera.status === 'alert'
-              ? '#ef4444'
-              : camera.status === 'inactive'
-              ? '#6b7280'
-              : '#22c55e';
+            camera.status === "alert"
+              ? "#ef4444"
+              : camera.status === "inactive"
+                ? "#6b7280"
+                : "#22c55e";
 
           const crowdRadius = camera.crowdDensity
             ? Math.min(camera.crowdDensity * 10, 200)
@@ -108,11 +110,18 @@ export function Map({
                     )}
                     {camera.status && (
                       <p className="text-xs mt-1 capitalize">
-                        Status: <span className={`font-medium ${
-                          camera.status === 'alert' ? 'text-red-500' :
-                          camera.status === 'inactive' ? 'text-gray-500' :
-                          'text-green-500'
-                        }`}>{camera.status}</span>
+                        Status:{" "}
+                        <span
+                          className={`font-medium ${
+                            camera.status === "alert"
+                              ? "text-red-500"
+                              : camera.status === "inactive"
+                                ? "text-gray-500"
+                                : "text-green-500"
+                          }`}
+                        >
+                          {camera.status}
+                        </span>
                       </p>
                     )}
                   </div>

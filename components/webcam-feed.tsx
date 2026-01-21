@@ -10,8 +10,10 @@ import {
   AlertTriangle,
   Video,
   VideoOff,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CameraStorage } from "@/lib/camera-storage";
 
 interface WebcamFeedProps {
   camera: {
@@ -28,6 +30,7 @@ interface WebcamFeedProps {
   };
   viewMode: "grid" | "list";
   onDetectionUpdate?: (cameraId: string, detections: DetectionResult) => void;
+  onDelete?: (cameraId: string) => void;
 }
 
 interface DetectionResult {
@@ -40,6 +43,7 @@ export function WebcamFeed({
   camera,
   viewMode,
   onDetectionUpdate,
+  onDelete,
 }: WebcamFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -415,6 +419,21 @@ export function WebcamFeed({
               ) : (
                 <Pause className="w-4 h-4" />
               )}
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (confirm(`Delete camera ${camera.name}?`)) {
+                  onDelete(camera.id);
+                }
+              }}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              title="Delete camera"
+            >
+              <Trash2 className="w-4 h-4" />
             </Button>
           )}
         </div>

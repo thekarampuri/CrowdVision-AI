@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapPin, Users, AlertTriangle } from "lucide-react";
-import type { LatLngExpression } from "leaflet";
+import type { LatLngExpression, Icon, DivIcon } from "leaflet";
 import { CameraStorage, type Camera } from "@/lib/camera-storage";
 
 // Dynamic imports to avoid SSR issues with Leaflet
@@ -45,10 +45,50 @@ export function HeatmapView({
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [customIcon, setCustomIcon] = useState<any>(null);
 
   useEffect(() => {
     setIsClient(true);
     loadCameras();
+
+    // Create custom marker icon
+    if (typeof window !== "undefined") {
+      const L = require("leaflet");
+
+      // Fix default marker icon issue
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      });
+
+      // Create custom colored icon
+      const createColoredIcon = (color: string) => {
+        return L.divIcon({
+          className: "custom-marker",
+          html: `
+            <div style="position: relative;">
+              <svg width="32" height="45" viewBox="0 0 32 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 29 16 29s16-17 16-29c0-8.837-7.163-16-16-16z" fill="${color}"/>
+                <circle cx="16" cy="16" r="6" fill="white"/>
+              </svg>
+            </div>
+          `,
+          iconSize: [32, 45],
+          iconAnchor: [16, 45],
+          popupAnchor: [0, -45],
+        });
+      };
+
+      setCustomIcon({
+        low: createColoredIcon("#22c55e"),
+        medium: createColoredIcon("#eab308"),
+        high: createColoredIcon("#ef4444"),
+      });
+    }
 
     // Listen for camera updates
     const handleCamerasUpdated = () => {
@@ -83,11 +123,11 @@ export function HeatmapView({
     }
   };
 
-  // Calculate map center based on all cameras
+  // Calculate map center based on all cameras (default: Solapur, Maharashtra)
   const mapCenter: LatLngExpression =
     cameras.length > 0
       ? [cameras[0].latitude, cameras[0].longitude]
-      : [28.614, 77.2091];
+      : [17.6599, 75.9064];
 
   if (!isClient) {
     return (
@@ -117,12 +157,14 @@ export function HeatmapView({
           ];
           const fillColor = getRiskColor(camera.riskLevel);
           const crowdRadius = camera.radius * 2;
+          const riskLevel = camera.riskLevel || "low";
 
           return (
             <div key={camera.id}>
-              {showMarkers && (
+              {showMarkers && customIcon && (
                 <Marker
                   position={position}
+                  icon={customIcon[riskLevel]}
                   eventHandlers={{ click: () => setSelectedCamera(camera) }}
                 >
                   <Popup>

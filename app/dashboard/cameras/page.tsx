@@ -43,6 +43,11 @@ export default function CamerasPage() {
     loadCameras();
   };
 
+  const handleDeleteCamera = (cameraId: string) => {
+    CameraStorage.deleteCamera(cameraId);
+    loadCameras();
+  };
+
   const handleDetectionUpdate = (cameraId: string, detections: any) => {
     CameraStorage.updateCameraDetection(
       cameraId,
@@ -186,6 +191,7 @@ export default function CamerasPage() {
               camera={camera}
               viewMode={viewMode}
               onDetectionUpdate={handleDetectionUpdate}
+              onDelete={handleDeleteCamera}
             />
           ))}
         </div>

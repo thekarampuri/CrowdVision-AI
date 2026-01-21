@@ -34,9 +34,11 @@ interface AddCameraDialogProps {
 function LocationPicker({
   position,
   setPosition,
+  markerIcon,
 }: {
   position: [number, number];
   setPosition: (pos: [number, number]) => void;
+  markerIcon?: any;
 }) {
   const { useMapEvents } = require("react-leaflet");
 
@@ -45,17 +47,18 @@ function LocationPicker({
       setPosition([e.latlng.lat, e.latlng.lng]);
     },
   });
-  return position ? <Marker position={position} /> : null;
+  return position ? <Marker position={position} icon={markerIcon} /> : null;
 }
 
 export function AddCameraDialog({ onAdd, onClose }: AddCameraDialogProps) {
   const [isClient, setIsClient] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [customIcon, setCustomIcon] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     location: "",
-    latitude: 28.614,
-    longitude: 77.209,
+    latitude: 17.6599,
+    longitude: 75.9064,
     radius: 50,
     alertThreshold: 200,
     resolution: "1920x1080",
@@ -64,6 +67,39 @@ export function AddCameraDialog({ onAdd, onClose }: AddCameraDialogProps) {
 
   useEffect(() => {
     setIsClient(true);
+
+    // Create custom marker icon for better visibility
+    if (typeof window !== "undefined") {
+      const L = require("leaflet");
+
+      // Fix default marker icon issue
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      });
+
+      // Create custom colored icon
+      const icon = L.divIcon({
+        className: "custom-marker",
+        html: `
+          <div style="position: relative;">
+            <svg width="32" height="45" viewBox="0 0 32 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 29 16 29s16-17 16-29c0-8.837-7.163-16-16-16z" fill="#3b82f6"/>
+              <circle cx="16" cy="16" r="6" fill="white"/>
+            </svg>
+          </div>
+        `,
+        iconSize: [32, 45],
+        iconAnchor: [16, 45],
+        popupAnchor: [0, -45],
+      });
+
+      setCustomIcon(icon);
+    }
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -290,6 +326,7 @@ export function AddCameraDialog({ onAdd, onClose }: AddCameraDialogProps) {
                       <LocationPicker
                         position={[formData.latitude, formData.longitude]}
                         setPosition={handleMapPositionChange}
+                        markerIcon={customIcon}
                       />
                     </MapContainer>
                     <div className="absolute bottom-3 left-3 right-3 glass-strong rounded-lg p-2 z-[1000] pointer-events-none">
