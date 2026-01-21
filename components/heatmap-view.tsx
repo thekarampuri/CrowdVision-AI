@@ -123,11 +123,8 @@ export function HeatmapView({
     }
   };
 
-  // Calculate map center based on all cameras (default: Solapur, Maharashtra)
-  const mapCenter: LatLngExpression =
-    cameras.length > 0
-      ? [cameras[0].latitude, cameras[0].longitude]
-      : [17.6599, 75.9064];
+  // Calculate map center - Solapur, Maharashtra
+  const mapCenter: LatLngExpression = [17.6599, 75.9064];
 
   if (!isClient) {
     return (
@@ -141,7 +138,8 @@ export function HeatmapView({
     <div className="relative w-full h-[600px]">
       <MapContainer
         center={mapCenter}
-        zoom={15}
+        zoom={13}
+        key={`map-${mapCenter[0]}-${mapCenter[1]}`}
         style={{ height: "100%", width: "100%", background: "#1e293b" }}
         className="z-0 rounded-3xl"
       >

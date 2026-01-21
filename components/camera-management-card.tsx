@@ -1,46 +1,55 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { MapPin, Trash2, Edit, Calendar, Signal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from "react";
+import { MapPin, Trash2, Edit, Calendar, Signal } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Camera {
-  id: string
-  name: string
-  location: string
-  status: "online" | "offline"
-  latitude: number
-  longitude: number
-  radius: number
-  alertThreshold: number
-  resolution: string
-  fps: number
-  lastMaintenance: Date
+  id: string;
+  name: string;
+  location: string;
+  status: "online" | "offline";
+  latitude: number;
+  longitude: number;
+  radius: number;
+  alertThreshold: number;
+  resolution: string;
+  fps: number;
+  lastMaintenance: Date;
 }
 
 interface CameraManagementCardProps {
-  camera: Camera
-  onUpdate: (cameraId: string, updates: any) => void
-  onDelete: (cameraId: string) => void
+  camera: Camera;
+  onUpdate: (cameraId: string, updates: any) => void;
+  onDelete: (cameraId: string) => void;
 }
 
-export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManagementCardProps) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editData, setEditData] = useState(camera)
+export function CameraManagementCard({
+  camera,
+  onUpdate,
+  onDelete,
+}: CameraManagementCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState(camera);
 
   const handleSave = () => {
-    onUpdate(camera.id, editData)
-    setIsEditing(false)
-  }
+    onUpdate(camera.id, editData);
+    setIsEditing(false);
+  };
 
   const handleCancel = () => {
-    setEditData(camera)
-    setIsEditing(false)
-  }
+    setEditData(camera);
+    setIsEditing(false);
+  };
 
-  const daysSinceMaintenance = Math.floor((Date.now() - camera.lastMaintenance.getTime()) / (1000 * 60 * 60 * 24))
+  const daysSinceMaintenance = camera.lastMaintenance
+    ? Math.floor(
+        (Date.now() - new Date(camera.lastMaintenance).getTime()) /
+          (1000 * 60 * 60 * 24),
+      )
+    : 0;
 
   return (
     <div className="glass-strong rounded-3xl p-6 border border-white/10">
@@ -56,14 +65,20 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                     : "bg-gradient-to-br from-red-500/20 to-orange-500/20"
                 }`}
               >
-                <Signal className={`w-6 h-6 ${camera.status === "online" ? "text-green-400" : "text-red-400"}`} />
+                <Signal
+                  className={`w-6 h-6 ${camera.status === "online" ? "text-green-400" : "text-red-400"}`}
+                />
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-white font-semibold text-lg">{camera.name}</h3>
+                  <h3 className="text-white font-semibold text-lg">
+                    {camera.name}
+                  </h3>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      camera.status === "online" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                      camera.status === "online"
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
                     }`}
                   >
                     {camera.status.toUpperCase()}
@@ -73,7 +88,9 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                   <MapPin className="w-3 h-3" />
                   {camera.location}
                 </p>
-                <p className="text-slate-500 text-xs font-mono mt-1">{camera.id}</p>
+                <p className="text-slate-500 text-xs font-mono mt-1">
+                  {camera.id}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -106,15 +123,21 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
             </div>
             <div className="glass rounded-xl p-3">
               <div className="text-slate-400 text-xs mb-1">Coverage Radius</div>
-              <div className="text-white text-sm font-semibold">{camera.radius}m</div>
+              <div className="text-white text-sm font-semibold">
+                {camera.radius}m
+              </div>
             </div>
             <div className="glass rounded-xl p-3">
               <div className="text-slate-400 text-xs mb-1">Alert Threshold</div>
-              <div className="text-white text-sm font-semibold">{camera.alertThreshold} people</div>
+              <div className="text-white text-sm font-semibold">
+                {camera.alertThreshold} people
+              </div>
             </div>
             <div className="glass rounded-xl p-3">
               <div className="text-slate-400 text-xs mb-1">Resolution</div>
-              <div className="text-white text-sm font-mono">{camera.resolution}</div>
+              <div className="text-white text-sm font-mono">
+                {camera.resolution}
+              </div>
             </div>
           </div>
 
@@ -122,11 +145,18 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
           <div className="flex items-center justify-between pt-4 border-t border-white/10">
             <div className="flex items-center gap-2 text-sm text-slate-400">
               <Calendar className="w-4 h-4" />
-              <span>Last maintenance: {daysSinceMaintenance} days ago</span>
+              <span>
+                Last maintenance:{" "}
+                {daysSinceMaintenance > 0
+                  ? `${daysSinceMaintenance} days ago`
+                  : "N/A"}
+              </span>
             </div>
             <div className="text-sm">
               <span className="text-slate-400">FPS:</span>
-              <span className="ml-2 text-white font-semibold">{camera.fps}</span>
+              <span className="ml-2 text-white font-semibold">
+                {camera.fps}
+              </span>
             </div>
           </div>
         </div>
@@ -141,7 +171,9 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
               <Input
                 id="name"
                 value={editData.name}
-                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                onChange={(e) =>
+                  setEditData({ ...editData, name: e.target.value })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -152,7 +184,9 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
               <Input
                 id="location"
                 value={editData.location}
-                onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                onChange={(e) =>
+                  setEditData({ ...editData, location: e.target.value })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -165,7 +199,12 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                 type="number"
                 step="0.0001"
                 value={editData.latitude}
-                onChange={(e) => setEditData({ ...editData, latitude: Number.parseFloat(e.target.value) })}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    latitude: Number.parseFloat(e.target.value),
+                  })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -178,7 +217,12 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                 type="number"
                 step="0.0001"
                 value={editData.longitude}
-                onChange={(e) => setEditData({ ...editData, longitude: Number.parseFloat(e.target.value) })}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    longitude: Number.parseFloat(e.target.value),
+                  })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -190,7 +234,12 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                 id="radius"
                 type="number"
                 value={editData.radius}
-                onChange={(e) => setEditData({ ...editData, radius: Number.parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    radius: Number.parseInt(e.target.value),
+                  })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -202,7 +251,12 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
                 id="threshold"
                 type="number"
                 value={editData.alertThreshold}
-                onChange={(e) => setEditData({ ...editData, alertThreshold: Number.parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    alertThreshold: Number.parseInt(e.target.value),
+                  })
+                }
                 className="glass border-white/20 bg-white/5 text-white h-10"
               />
             </div>
@@ -227,5 +281,5 @@ export function CameraManagementCard({ camera, onUpdate, onDelete }: CameraManag
         </div>
       )}
     </div>
-  )
+  );
 }
