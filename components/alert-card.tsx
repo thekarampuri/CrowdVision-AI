@@ -1,31 +1,38 @@
-"use client"
+"use client";
 
-import { AlertTriangle, MapPin, Users, Clock, CheckCircle, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import {
+  AlertTriangle,
+  MapPin,
+  Users,
+  Clock,
+  CheckCircle,
+  Eye,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface Alert {
-  id: string
-  title: string
-  description: string
-  severity: "critical" | "warning" | "info"
-  location: string
-  cameraId: string
-  peopleCount: number
-  timestamp: Date
-  status: "active" | "acknowledged" | "resolved"
-  latitude: number
-  longitude: number
+  id: string;
+  title: string;
+  description: string;
+  severity: "critical" | "warning" | "info";
+  location: string;
+  cameraId: string;
+  peopleCount: number;
+  timestamp: Date;
+  status: "active" | "acknowledged" | "resolved";
+  latitude: number;
+  longitude: number;
 }
 
 interface AlertCardProps {
-  alert: Alert
-  onAcknowledge: (alertId: string) => void
-  onResolve: (alertId: string) => void
+  alert: Alert;
+  onAcknowledge: (alertId: string) => void;
+  onResolve: (alertId: string) => void;
 }
 
 export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(false);
 
   const getSeverityStyles = (severity: string) => {
     switch (severity) {
@@ -35,55 +42,65 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
           border: "border-red-500/50",
           icon: "text-red-400",
           badge: "bg-red-500/20 text-red-400",
-        }
+        };
       case "warning":
         return {
           bg: "from-yellow-500/20 to-orange-500/20",
           border: "border-yellow-500/50",
           icon: "text-yellow-400",
           badge: "bg-yellow-500/20 text-yellow-400",
-        }
+        };
       case "info":
         return {
           bg: "from-blue-500/20 to-cyan-500/20",
           border: "border-blue-500/50",
           icon: "text-blue-400",
           badge: "bg-blue-500/20 text-blue-400",
-        }
+        };
       default:
         return {
           bg: "from-slate-500/20 to-slate-600/20",
           border: "border-slate-500/50",
           icon: "text-slate-400",
           badge: "bg-slate-500/20 text-slate-400",
-        }
+        };
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400">Active</span>
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-400">
+            Active
+          </span>
+        );
       case "acknowledged":
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400">
             Acknowledged
           </span>
-        )
+        );
       case "resolved":
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400">Resolved</span>
-        )
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400">
+            Resolved
+          </span>
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  const styles = getSeverityStyles(alert.severity)
-  const timeAgo = Math.floor((Date.now() - alert.timestamp.getTime()) / (1000 * 60))
+  const styles = getSeverityStyles(alert.severity);
+  const timeAgo = Math.floor(
+    (Date.now() - alert.timestamp.getTime()) / (1000 * 60),
+  );
 
   return (
-    <div className={`glass-strong rounded-3xl border ${styles.border} overflow-hidden`}>
+    <div
+      className={`glass-strong rounded-3xl border ${styles.border} overflow-hidden`}
+    >
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
@@ -97,7 +114,9 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-white font-semibold text-lg">{alert.title}</h3>
+                <h3 className="text-white font-semibold text-lg">
+                  {alert.title}
+                </h3>
                 {getStatusBadge(alert.status)}
               </div>
               <p className="text-slate-400 text-sm mb-3">{alert.description}</p>
@@ -108,7 +127,9 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
                 </div>
                 <div className="flex items-center gap-2 text-slate-400">
                   <Users className="w-4 h-4" />
-                  <span className="text-white font-semibold">{alert.peopleCount}</span>
+                  <span className="text-white font-semibold">
+                    {alert.peopleCount}
+                  </span>
                   <span>people</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-400">
@@ -118,8 +139,10 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
               </div>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-semibold ${styles.badge}`}>
-            {alert.severity.toUpperCase()}
+          <div
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${styles.badge}`}
+          >
+            {(alert.severity || "info").toUpperCase()}
           </div>
         </div>
 
@@ -170,7 +193,9 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
               </div>
               <div className="glass rounded-xl p-3">
                 <div className="text-slate-400 text-xs mb-1">Camera ID</div>
-                <div className="text-white font-mono text-sm">{alert.cameraId}</div>
+                <div className="text-white font-mono text-sm">
+                  {alert.cameraId}
+                </div>
               </div>
               <div className="glass rounded-xl p-3">
                 <div className="text-slate-400 text-xs mb-1">Coordinates</div>
@@ -180,7 +205,9 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
               </div>
               <div className="glass rounded-xl p-3">
                 <div className="text-slate-400 text-xs mb-1">Timestamp</div>
-                <div className="text-white text-sm">{alert.timestamp.toLocaleTimeString()}</div>
+                <div className="text-white text-sm">
+                  {alert.timestamp.toLocaleTimeString()}
+                </div>
               </div>
             </div>
             <Button
@@ -193,5 +220,5 @@ export function AlertCard({ alert, onAcknowledge, onResolve }: AlertCardProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Search, Calendar, Filter, FileText } from "lucide-react";
+import { Search, Calendar, Filter, FileText } from "lucide-react";
 import { AlertStorage, type Alert } from "@/lib/alert-storage";
 
 export default function HistoryPage() {
@@ -67,51 +67,6 @@ export default function HistoryPage() {
     return matchesSearch && matchesSeverity && matchesDate;
   });
 
-  const handleExportCSV = () => {
-    const csvContent = [
-      [
-        "Alert ID",
-        "Title",
-        "Severity",
-        "Location",
-        "Camera ID",
-        "People Count",
-        "Timestamp",
-        "Resolved At",
-        "Response Time (minutes)",
-      ],
-      ...filteredHistory.map((item) => {
-        const responseTime = item.resolvedAt
-          ? Math.round(
-              (new Date(item.resolvedAt).getTime() -
-                new Date(item.timestamp).getTime()) /
-                (1000 * 60),
-            )
-          : 0;
-        return [
-          item.id || "",
-          item.title,
-          item.severity,
-          item.location,
-          item.cameraId,
-          item.peopleCount,
-          new Date(item.timestamp).toISOString(),
-          item.resolvedAt ? new Date(item.resolvedAt).toISOString() : "N/A",
-          responseTime,
-        ];
-      }),
-    ]
-      .map((row) => row.map((cell) => `"${cell}"`).join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `crowdvision-ai-alert-history-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-  };
-
   const avgResponseTime =
     filteredHistory.length > 0
       ? Math.round(
@@ -142,14 +97,6 @@ export default function HistoryPage() {
               Historical alert records and analytics
             </p>
           </div>
-          <Button
-            onClick={handleExportCSV}
-            disabled={filteredHistory.length === 0}
-            className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white disabled:opacity-50"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
         </div>
 
         {/* Stats */}
