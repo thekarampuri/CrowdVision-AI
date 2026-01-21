@@ -70,23 +70,26 @@ echo.
 REM Start servers
 echo [5/5] Starting servers...
 echo.
-echo Starting ML Backend Server (Port 5000)...
-start "CrowdVision ML Server" cmd /k "cd /d %~dp0ml-server && python app.py"
+echo ========================================
+echo   Starting ML Backend Server...
+echo ========================================
+echo.
+
+start /B cmd /c "cd /d %~dp0ml-server && python app.py"
 
 echo Waiting for ML server to start...
 timeout /t 5 >nul
 
-echo Starting Next.js Frontend Server (Port 3000)...
 echo.
 echo ========================================
-echo   Servers Running:
+echo   Starting Next.js Frontend Server...
+echo ========================================
+echo.
 echo   - Frontend: http://localhost:3000
 echo   - ML API:   http://localhost:5000
 echo ========================================
 echo.
-echo Press Ctrl+C to stop the frontend server
-echo Close the ML Server window to stop backend
-echo ========================================
+echo Press Ctrl+C to stop both servers
 echo.
 
 npm run dev
