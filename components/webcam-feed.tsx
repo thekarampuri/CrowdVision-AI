@@ -177,11 +177,10 @@ export function WebcamFeed({
         onDetectionUpdate(camera.id, result);
       }
 
-      // Create and manage alerts based on count thresholds
-      // 0 = safe, 5-10 = medium, >10 = high risk
+      // Only create HIGH RISK alerts when count > 10
+      // Check for existing high risk alert within last 1 minute
       if (result.count > 10) {
-        // High risk - create critical alert
-        const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 5);
+        const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 1);
 
         if (!hasRecent) {
           try {
@@ -216,45 +215,8 @@ export function WebcamFeed({
             console.error("Error creating alert:", alertError);
           }
         }
-      } else if (result.count >= 5 && result.count <= 10) {
-        // Medium risk - create warning alert
-        const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 5);
-
-        if (!hasRecent) {
-          try {
-            const alertId = await AlertStorage.createAlert({
-              title: `Medium Crowd Density - ${camera.name}`,
-              description: `Warning: Moderate crowd detected with ${result.count} people`,
-              severity: "warning",
-              location: camera.location,
-              cameraId: camera.id,
-              peopleCount: result.count,
-              timestamp: new Date(),
-              status: "active",
-              latitude: camera.latitude,
-              longitude: camera.longitude,
-              cameraName: camera.name,
-            });
-
-            // Auto-resolve after creation to move to history
-            setTimeout(async () => {
-              try {
-                await AlertStorage.resolveAlert(alertId);
-                console.log(`[ALERT] Auto-resolved alert ${alertId}`);
-              } catch (error) {
-                console.error("Error auto-resolving alert:", error);
-              }
-            }, 1000);
-
-            console.log(
-              `[ALERT] Medium risk alert created for ${camera.id} with ${result.count} people`,
-            );
-          } catch (alertError) {
-            console.error("Error creating alert:", alertError);
-          }
-        }
       }
-      // If count is 0-4, it's safe - no alert needed
+      // If count is 0-10, no alert is created
 
       drawBoundingBoxes(ctx, result.boundingBoxes, canvas.width, canvas.height);
     } catch (err: any) {

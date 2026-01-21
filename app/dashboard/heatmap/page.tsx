@@ -1,15 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { HeatmapView } from "@/components/heatmap-view"
-import { Button } from "@/components/ui/button"
-import { Layers, MapPin } from "lucide-react"
+import { useState } from "react";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { HeatmapView } from "@/components/heatmap-view";
+import { Button } from "@/components/ui/button";
+import { Layers, MapPin } from "lucide-react";
 
 export default function HeatmapPage() {
-  const [showHeatmap, setShowHeatmap] = useState(true)
-  const [showMarkers, setShowMarkers] = useState(true)
-  const [filterRisk, setFilterRisk] = useState<"all" | "low" | "medium" | "high">("all")
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showMarkers, setShowMarkers] = useState(true);
+  const [filterRisk, setFilterRisk] = useState<
+    "all" | "low" | "medium" | "high"
+  >("all");
 
   return (
     <DashboardLayout>
@@ -17,8 +19,12 @@ export default function HeatmapPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Geo-Based Heatmap</h1>
-            <p className="text-slate-400">Real-time crowd density visualization across all camera zones</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Geo-Based Heatmap
+            </h1>
+            <p className="text-slate-400">
+              Real-time crowd density visualization across all camera zones
+            </p>
           </div>
         </div>
 
@@ -104,7 +110,11 @@ export default function HeatmapPage() {
 
         {/* Map */}
         <div className="glass-strong rounded-3xl overflow-hidden border border-white/10">
-          <HeatmapView showHeatmap={showHeatmap} showMarkers={showMarkers} filterRisk={filterRisk} />
+          <HeatmapView
+            showHeatmap={showHeatmap}
+            showMarkers={showMarkers}
+            filterRisk={filterRisk}
+          />
         </div>
 
         {/* Legend */}
@@ -112,9 +122,9 @@ export default function HeatmapPage() {
           <div className="glass-strong rounded-2xl p-4">
             <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-400" />
-              Low Density
+              Safe
             </h3>
-            <p className="text-slate-400 text-sm mb-2">0-100 people detected</p>
+            <p className="text-slate-400 text-sm mb-2">0 people detected</p>
             <div className="text-green-400 text-xl font-bold">Safe Zone</div>
           </div>
 
@@ -123,8 +133,10 @@ export default function HeatmapPage() {
               <div className="w-3 h-3 rounded-full bg-yellow-400" />
               Medium Density
             </h3>
-            <p className="text-slate-400 text-sm mb-2">101-250 people detected</p>
-            <div className="text-yellow-400 text-xl font-bold">Monitor Zone</div>
+            <p className="text-slate-400 text-sm mb-2">1-10 people detected</p>
+            <div className="text-yellow-400 text-xl font-bold">
+              Monitor Zone
+            </div>
           </div>
 
           <div className="glass-strong rounded-2xl p-4">
@@ -132,11 +144,11 @@ export default function HeatmapPage() {
               <div className="w-3 h-3 rounded-full bg-red-400" />
               High Density
             </h3>
-            <p className="text-slate-400 text-sm mb-2">251+ people detected</p>
+            <p className="text-slate-400 text-sm mb-2">11+ people detected</p>
             <div className="text-red-400 text-xl font-bold">Alert Zone</div>
           </div>
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 }

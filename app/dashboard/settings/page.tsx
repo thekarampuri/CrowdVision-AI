@@ -79,6 +79,45 @@ export default function SettingsPage() {
           </Button>
         </div>
 
+        {/* Admin Section - Clear Alerts */}
+        <div className="glass-strong rounded-3xl p-6 border border-red-500/30">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Admin Actions
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <p className="text-slate-400 text-sm mb-3">
+                Clear all existing alerts from Firebase database. This will
+                remove all alerts from both Alerts and History pages.
+              </p>
+              <Button
+                onClick={async () => {
+                  if (
+                    confirm(
+                      "Are you sure you want to clear ALL alerts from Firebase? This cannot be undone!",
+                    )
+                  ) {
+                    try {
+                      const { AlertStorage } =
+                        await import("@/lib/alert-storage");
+                      await AlertStorage.clearAllAlerts();
+                      alert("All alerts have been cleared successfully!");
+                    } catch (error) {
+                      console.error("Error clearing alerts:", error);
+                      alert(
+                        "Failed to clear alerts. Check console for details.",
+                      );
+                    }
+                  }
+                }}
+                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
+              >
+                Clear All Alerts
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="glass-strong rounded-2xl p-4 border border-blue-500/30">
@@ -146,45 +185,6 @@ export default function SettingsPage() {
             </p>
           </div>
         )}
-
-        {/* Admin Section - Clear Alerts */}
-        <div className="glass-strong rounded-3xl p-6 border border-red-500/30">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Admin Actions
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <p className="text-slate-400 text-sm mb-3">
-                Clear all existing alerts from the database. This action cannot
-                be undone.
-              </p>
-              <Button
-                onClick={async () => {
-                  if (
-                    confirm(
-                      "Are you sure you want to clear ALL alerts from Firebase? This cannot be undone!",
-                    )
-                  ) {
-                    try {
-                      const { AlertStorage } =
-                        await import("@/lib/alert-storage");
-                      await AlertStorage.clearAllAlerts();
-                      alert("All alerts have been cleared successfully!");
-                    } catch (error) {
-                      console.error("Error clearing alerts:", error);
-                      alert(
-                        "Failed to clear alerts. Check console for details.",
-                      );
-                    }
-                  }
-                }}
-                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
-              >
-                Clear All Alerts
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
 
       {showAddDialog && (

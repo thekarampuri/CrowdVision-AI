@@ -83,6 +83,7 @@ export function HeatmapView({
         });
       };
 
+      // Not used anymore - markers are created dynamically
       setCustomIcon({
         low: createColoredIcon("#22c55e"),
         medium: createColoredIcon("#eab308"),
@@ -123,6 +124,17 @@ export function HeatmapView({
     }
   };
 
+  // Get dynamic color based on people count
+  const getDynamicColor = (peopleCount: number | undefined) => {
+    if (!peopleCount || peopleCount === 0) {
+      return "#22c55e"; // Green for 0 people
+    } else if (peopleCount >= 1 && peopleCount <= 10) {
+      return "#eab308"; // Yellow for 1-10 people
+    } else {
+      return "#ef4444"; // Red for >10 people
+    }
+  };
+
   // Calculate map center - Solapur, Maharashtra
   const mapCenter: LatLngExpression = [17.6599, 75.9064];
 
@@ -153,16 +165,32 @@ export function HeatmapView({
             camera.latitude,
             camera.longitude,
           ];
-          const fillColor = getRiskColor(camera.riskLevel);
+          const fillColor = getDynamicColor(camera.peopleCount);
           const crowdRadius = camera.radius * 2;
-          const riskLevel = camera.riskLevel || "low";
+
+          // Create dynamic marker icon based on people count
+          const L = require("leaflet");
+          const dynamicIcon = L.divIcon({
+            className: "custom-marker",
+            html: `
+              <div style="position: relative;">
+                <svg width="32" height="45" viewBox="0 0 32 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 29 16 29s16-17 16-29c0-8.837-7.163-16-16-16z" fill="${fillColor}"/>
+                  <circle cx="16" cy="16" r="6" fill="white"/>
+                </svg>
+              </div>
+            `,
+            iconSize: [32, 45],
+            iconAnchor: [16, 45],
+            popupAnchor: [0, -45],
+          });
 
           return (
             <div key={camera.id}>
-              {showMarkers && customIcon && (
+              {showMarkers && (
                 <Marker
                   position={position}
-                  icon={customIcon[riskLevel]}
+                  icon={dynamicIcon}
                   eventHandlers={{ click: () => setSelectedCamera(camera) }}
                 >
                   <Popup>
