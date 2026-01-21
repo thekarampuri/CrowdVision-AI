@@ -323,4 +323,30 @@ export class AlertStorage {
       };
     }
   }
+
+  /**
+   * Clear all alerts from Firebase (use with caution)
+   */
+  static async clearAllAlerts(): Promise<void> {
+    try {
+      const q = query(collection(db, ALERTS_COLLECTION));
+      const querySnapshot = await getDocs(q);
+
+      const deletePromises: Promise<void>[] = [];
+      querySnapshot.forEach((doc) => {
+        deletePromises.push(deleteDoc(doc.ref));
+      });
+
+      await Promise.all(deletePromises);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("alerts-updated"));
+      }
+
+      console.log(`Cleared ${querySnapshot.size} alerts from Firebase`);
+    } catch (error) {
+      console.error("Error clearing alerts:", error);
+      throw error;
+    }
+  }
 }
