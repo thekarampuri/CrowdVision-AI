@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CameraStorage } from "@/lib/camera-storage";
+import { AlertStorage } from "@/lib/alert-storage";
 
 interface WebcamFeedProps {
   camera: {
@@ -145,10 +146,12 @@ export function WebcamFeed({
       if (!isPaused && videoRef.current && canvasRef.current) {
         runDetection();
       }
-    }, 500) as unknown as NodeJS.Timeout;
+    }, 2000) as unknown as NodeJS.Timeout;
   };
 
   const runDetection = async () => {
+    if (isPaused || !isWebcamActive) return;
+
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -174,13 +177,38 @@ export function WebcamFeed({
         onDetectionUpdate(camera.id, result);
       }
 
+      // Create high alert if count exceeds 10
+      if (result.count > 10) {
+        const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 5);
+
+        if (!hasRecent) {
+          try {
+            await AlertStorage.createAlert({
+              title: `High Crowd Density - ${camera.name}`,
+              description: `Crowd count has exceeded threshold with ${result.count} people detected`,
+              severity: "critical",
+              location: camera.location,
+              cameraId: camera.id,
+              peopleCount: result.count,
+              timestamp: new Date(),
+              status: "active",
+              latitude: camera.latitude,
+              longitude: camera.longitude,
+              cameraName: camera.name,
+            });
+            console.log(
+              `[ALERT] High alert created for ${camera.id} with ${result.count} people`,
+            );
+          } catch (alertError) {
+            console.error("Error creating alert:", alertError);
+          }
+        }
+      }
+
       drawBoundingBoxes(ctx, result.boundingBoxes, canvas.width, canvas.height);
     } catch (err: any) {
       console.error("Detection error:", err);
-      // Only set error if it's not a temporary network issue
-      if (err.message !== "Failed to fetch") {
-        setError(`ML Error: ${err.message}`);
-      }
+      setError(err.message || "Detection failed");
     }
   };
 

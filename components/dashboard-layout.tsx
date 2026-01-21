@@ -1,37 +1,50 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useAuth } from "@/lib/auth-context"
-import { useTheme } from "@/lib/theme-context"
-import { Button } from "@/components/ui/button"
-import { Scan, LayoutDashboard, Camera, Map, BarChart3, Bell, Settings, Menu, X, LogOut, History, FileText, Sun, Moon } from "lucide-react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
+import { Button } from "@/components/ui/button";
+import {
+  Scan,
+  LayoutDashboard,
+  Camera,
+  Map,
+  BarChart3,
+  Bell,
+  Settings,
+  Menu,
+  X,
+  LogOut,
+  History,
+  FileText,
+  Sun,
+  Moon,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Live Cameras", href: "/dashboard/cameras", icon: Camera },
   { name: "Heatmap", href: "/dashboard/heatmap", icon: Map },
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
   { name: "Alerts", href: "/dashboard/alerts", icon: Bell },
-  { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "History", href: "/dashboard/history", icon: History },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
-]
+];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { user, logout } = useAuth()
-  const { theme, toggleTheme } = useTheme()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout()
-    router.push("/")
-  }
+    await logout();
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -54,8 +67,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 glass-strong border-r border-white/10 z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
+        className={`fixed top-0 left-0 h-full w-72 glass-strong border-r border-white/10 z-50 transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
       >
         <div className="flex flex-col h-full p-6">
           {/* Logo */}
@@ -65,9 +79,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">CrowdVision AI</h1>
-              <p className="text-xs text-cyan-400 font-mono">Smart Surveillance</p>
+              <p className="text-xs text-cyan-400 font-mono">
+                Smart Surveillance
+              </p>
             </div>
-            <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden text-slate-400 hover:text-white">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="ml-auto lg:hidden text-slate-400 hover:text-white"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -75,20 +94,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           {/* Navigation */}
           <nav className="flex-1 space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href;
               return (
-                <Link key={item.name} href={item.href} onClick={() => setSidebarOpen(false)}>
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                >
                   <div
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                      }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    }`}
                   >
                     <item.icon className="w-5 h-5" />
                     <span className="font-medium">{item.name}</span>
                   </div>
                 </Link>
-              )
+              );
             })}
           </nav>
 
@@ -100,8 +124,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   {user?.email?.[0].toUpperCase() || "G"}
                 </div>
                 <div className="flex-1">
-                  <div className="text-white font-medium text-sm">{user?.email || "Guest User"}</div>
-                  <div className="text-slate-400 text-xs">{user ? "Authenticated" : "Limited Access"}</div>
+                  <div className="text-white font-medium text-sm">
+                    {user?.email || "Guest User"}
+                  </div>
+                  <div className="text-slate-400 text-xs">
+                    {user ? "Authenticated" : "Limited Access"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -122,7 +150,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Top bar */}
         <header className="sticky top-0 z-30 glass-strong border-b border-white/10">
           <div className="flex items-center justify-between px-6 py-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-white">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden text-white"
+            >
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center gap-4 ml-auto">
@@ -141,7 +172,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </Button>
               <div className="flex items-center gap-2 glass rounded-full px-4 py-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-sm text-muted-foreground">System Active</span>
+                <span className="text-sm text-muted-foreground">
+                  System Active
+                </span>
               </div>
             </div>
           </div>
@@ -151,5 +184,5 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <main className="relative z-10 p-6">{children}</main>
       </div>
     </div>
-  )
+  );
 }
