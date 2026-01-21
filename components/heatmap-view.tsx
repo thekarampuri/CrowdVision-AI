@@ -1,12 +1,39 @@
-"use client"
+"use client";
 
-import { useRef, useState } from "react"
-import { MapPin, Users, AlertTriangle } from "lucide-react"
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { MapPin, Users, AlertTriangle } from "lucide-react";
+import type { LatLngExpression } from "leaflet";
+
+// Dynamic imports to avoid SSR issues with Leaflet
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false },
+);
+
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
+
+const Circle = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Circle),
+  { ssr: false },
+);
 
 interface HeatmapViewProps {
-  showHeatmap: boolean
-  showMarkers: boolean
-  filterRisk: "all" | "low" | "medium" | "high"
+  showHeatmap: boolean;
+  showMarkers: boolean;
+  filterRisk: "all" | "low" | "medium" | "high";
 }
 
 const cameraLocations = [
@@ -55,138 +82,125 @@ const cameraLocations = [
     riskLevel: "low" as const,
     radius: 30,
   },
-]
+];
 
-export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapViewProps) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  const [selectedCamera, setSelectedCamera] = useState<(typeof cameraLocations)[0] | null>(null)
+export function HeatmapView({
+  showHeatmap,
+  showMarkers,
+  filterRisk,
+}: HeatmapViewProps) {
+  const [selectedCamera, setSelectedCamera] = useState<
+    (typeof cameraLocations)[0] | null
+  >(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const filteredLocations = cameraLocations.filter((loc) => {
-    if (filterRisk === "all") return true
-    return loc.riskLevel === filterRisk
-  })
+    if (filterRisk === "all") return true;
+    return loc.riskLevel === filterRisk;
+  });
 
   const getRiskColor = (level: string) => {
     switch (level) {
       case "low":
-        return "bg-green-500"
+        return "#22c55e";
       case "medium":
-        return "bg-yellow-500"
+        return "#eab308";
       case "high":
-        return "bg-red-500"
+        return "#ef4444";
       default:
-        return "bg-slate-500"
+        return "#64748b";
     }
+  };
+
+  const mapCenter: LatLngExpression = [28.614, 77.2091];
+
+  if (!isClient) {
+    return (
+      <div className="relative w-full h-[600px] bg-muted flex items-center justify-center">
+        <p className="text-muted-foreground">Loading map...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="relative w-full h-[600px] bg-muted">
-      {/* Simulated map background */}
-      <div className="absolute inset-0">
-        <div className="w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
-          {/* Grid lines to simulate map */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+    <div className="relative w-full h-[600px]">
+      <MapContainer
+        center={mapCenter}
+        zoom={15}
+        style={{ height: "100%", width: "100%", background: "#1e293b" }}
+        className="z-0 rounded-3xl"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          {/* Heatmap visualization */}
-          {showHeatmap && (
-            <div className="absolute inset-0">
-              {filteredLocations.map((location, index) => {
-                const intensity = location.peopleCount / 350
-                const color =
-                  location.riskLevel === "high"
-                    ? "rgba(239, 68, 68, 0.4)"
-                    : location.riskLevel === "medium"
-                      ? "rgba(234, 179, 8, 0.4)"
-                      : "rgba(34, 197, 94, 0.4)"
+        {filteredLocations.map((location) => {
+          const position: LatLngExpression = [location.lat, location.lng];
+          const fillColor = getRiskColor(location.riskLevel);
+          const crowdRadius = location.radius * 2;
 
-                return (
-                  <div
-                    key={`heatmap-${index}`}
-                    className="absolute rounded-full blur-3xl animate-pulse"
-                    style={{
-                      left: `${20 + index * 15}%`,
-                      top: `${30 + (index % 3) * 20}%`,
-                      width: `${location.radius * 3}px`,
-                      height: `${location.radius * 3}px`,
-                      backgroundColor: color,
-                      opacity: 0.6 + intensity * 0.4,
-                    }}
-                  />
-                )
-              })}
-            </div>
-          )}
+          return (
+            <div key={location.id}>
+              {showMarkers && (
+                <Marker
+                  position={position}
+                  eventHandlers={{ click: () => setSelectedCamera(location) }}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <h3 className="font-semibold text-sm mb-1">
+                        {location.name}
+                      </h3>
+                      <p className="text-xs mb-1">ID: {location.id}</p>
+                      <p className="text-xs mb-1">
+                        People: {location.peopleCount}
+                      </p>
+                      <p className="text-xs mb-1 capitalize">
+                        Risk: {location.riskLevel}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
 
-          {/* Camera markers */}
-          {showMarkers &&
-            filteredLocations.map((location, index) => (
-              <div
-                key={location.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                style={{
-                  left: `${20 + index * 15}%`,
-                  top: `${30 + (index % 3) * 20}%`,
-                }}
-                onClick={() => setSelectedCamera(location)}
-              >
-                {/* Coverage radius */}
-                <div
-                  className={`absolute rounded-full border-2 ${location.riskLevel === "high"
-                      ? "border-red-400/30"
-                      : location.riskLevel === "medium"
-                        ? "border-yellow-400/30"
-                        : "border-green-400/30"
-                    } -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2`}
-                  style={{
-                    width: `${location.radius * 2}px`,
-                    height: `${location.radius * 2}px`,
+              {showHeatmap && (
+                <Circle
+                  center={position}
+                  radius={crowdRadius}
+                  pathOptions={{
+                    fillColor: fillColor,
+                    fillOpacity: 0.3,
+                    color: fillColor,
+                    weight: 2,
+                    opacity: 0.6,
                   }}
                 />
-
-                {/* Marker */}
-                <div className="relative">
-                  <div
-                    className={`w-10 h-10 rounded-full ${getRiskColor(location.riskLevel)} flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110`}
-                  >
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 glass rounded-lg px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    <span className="text-white text-xs font-semibold">{location.name}</span>
-                  </div>
-                </div>
-
-                {/* Pulse effect */}
-                {location.riskLevel === "high" && (
-                  <div
-                    className={`absolute w-10 h-10 rounded-full ${getRiskColor(location.riskLevel)} opacity-50 animate-ping`}
-                  />
-                )}
-              </div>
-            ))}
-        </div>
-      </div>
-
-      {/* Map controls */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
-        <button className="w-10 h-10 glass-strong rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-          +
-        </button>
-        <button className="w-10 h-10 glass-strong rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition-colors">
-          −
-        </button>
-      </div>
+              )}
+            </div>
+          );
+        })}
+      </MapContainer>
 
       {/* Camera info panel */}
       {selectedCamera && (
-        <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 glass-strong rounded-2xl p-4 border border-white/10">
+        <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 glass-strong rounded-2xl p-4 border border-white/10 z-[1000]">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="text-foreground font-semibold text-lg">{selectedCamera.name}</h3>
-              <p className="text-muted-foreground text-sm">{selectedCamera.id}</p>
+              <h3 className="text-foreground font-semibold text-lg">
+                {selectedCamera.name}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {selectedCamera.id}
+              </p>
             </div>
             <button
               onClick={() => setSelectedCamera(null)}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="text-slate-400 hover:text-white transition-colors text-xl leading-none"
             >
               ×
             </button>
@@ -198,7 +212,9 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
                 <Users className="w-4 h-4" />
                 People Detected
               </span>
-              <span className="text-foreground font-semibold">{selectedCamera.peopleCount}</span>
+              <span className="text-foreground font-semibold">
+                {selectedCamera.peopleCount}
+              </span>
             </div>
 
             <div className="flex items-center justify-between">
@@ -207,20 +223,25 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
                 Risk Level
               </span>
               <span
-                className={`font-semibold ${selectedCamera.riskLevel === "high"
+                className={`font-semibold ${
+                  selectedCamera.riskLevel === "high"
                     ? "text-red-400"
                     : selectedCamera.riskLevel === "medium"
                       ? "text-yellow-400"
                       : "text-green-400"
-                  }`}
+                }`}
               >
                 {selectedCamera.riskLevel.toUpperCase()}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">Coverage Radius</span>
-              <span className="text-foreground font-semibold">{selectedCamera.radius}m</span>
+              <span className="text-muted-foreground text-sm">
+                Coverage Radius
+              </span>
+              <span className="text-foreground font-semibold">
+                {selectedCamera.radius}m
+              </span>
             </div>
 
             <button className="w-full mt-2 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all">
@@ -231,10 +252,14 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
       )}
 
       {/* Stats overlay */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2">
+      <div className="absolute top-4 left-4 flex flex-col gap-2 z-[1000]">
         <div className="glass-strong rounded-xl px-4 py-3">
-          <div className="text-muted-foreground text-xs mb-1">Total Cameras</div>
-          <div className="text-white text-2xl font-bold">{filteredLocations.length}</div>
+          <div className="text-muted-foreground text-xs mb-1">
+            Total Cameras
+          </div>
+          <div className="text-white text-2xl font-bold">
+            {filteredLocations.length}
+          </div>
         </div>
         <div className="glass-strong rounded-xl px-4 py-3">
           <div className="text-slate-400 text-xs mb-1">Total People</div>
@@ -244,5 +269,5 @@ export function HeatmapView({ showHeatmap, showMarkers, filterRisk }: HeatmapVie
         </div>
       </div>
     </div>
-  )
+  );
 }
