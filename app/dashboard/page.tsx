@@ -53,8 +53,9 @@ export default function DashboardPage() {
       setAlerts(activeAlerts);
 
       // Calculate stats
+      // Count people only from online cameras
       const totalPeople = allCameras.reduce(
-        (sum, cam) => sum + (cam.peopleCount || 0),
+        (sum, cam) => sum + (cam.status === "online" ? (cam.peopleCount ?? 0) : 0),
         0,
       );
       const activeCameras = allCameras.filter(

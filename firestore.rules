@@ -1,11 +1,7 @@
-rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /alerts/{alertId} {
-      allow read, write: if true;
-    }
-    match /high_risk_alerts/{alertId} {
+    match /{document=**} {
+      // Development: allow all reads/writes
       allow read, write: if true;
     }
   }
