@@ -48,27 +48,22 @@ fun CrowdVisionNavHost() {
             AlertDetailScreen(
                 alert = alert,
                 onBack = { navController.popBackStack() },
-                onViewOnMap = { latitude, longitude ->
-                    navController.navigate("map/$latitude/$longitude")
+                onViewOnMap = { selectedAlert ->
+                    val alertJson = Gson().toJson(selectedAlert)
+                    navController.navigate("map/$alertJson")
                 }
             )
         }
         composable(
-            "map/{latitude}/{longitude}",
-            arguments = listOf(
-                navArgument("latitude") { type = NavType.FloatType },
-                navArgument("longitude") { type = NavType.FloatType }
-            )
+            "map/{alertJson}",
+            arguments = listOf(navArgument("alertJson") { type = NavType.StringType })
         ) { backStackEntry ->
-            val latitude = backStackEntry.arguments?.getFloat("latitude")?.toDouble()
-            val longitude = backStackEntry.arguments?.getFloat("longitude")?.toDouble()
-            if (latitude != null && longitude != null) {
-                MapScreen(
-                    latitude = latitude,
-                    longitude = longitude,
-                    onBack = { navController.popBackStack() }
-                )
-            }
+            val json = backStackEntry.arguments?.getString("alertJson")
+            val alert = Gson().fromJson(json, Alert::class.java)
+            MapScreen(
+                alert = alert,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

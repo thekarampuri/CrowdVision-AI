@@ -40,7 +40,7 @@ import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 fun AlertDetailScreen(
     alert: Alert,
     onBack: () -> Unit,
-    onViewOnMap: (Double, Double) -> Unit
+    onViewOnMap: (Alert) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -100,7 +100,7 @@ fun AlertDetailScreen(
             // Action Buttons
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Button(
-                    onClick = { onViewOnMap(alert.latitude, alert.longitude) },
+                    onClick = { onViewOnMap(alert) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("View Location on Map")
@@ -122,6 +122,6 @@ fun AlertDetailScreen(
 fun AlertDetailScreenPreview() {
     CrowdVisionMobileTheme {
         val sampleAlert = Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
-        AlertDetailScreen(alert = sampleAlert, onBack = {}, onViewOnMap = { _, _ -> })
+        AlertDetailScreen(alert = sampleAlert, onBack = {}, onViewOnMap = { })
     }
 }
