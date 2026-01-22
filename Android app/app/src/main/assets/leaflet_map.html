@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0; /* Light gray background */
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map;
+
+    function initMap() {
+        // 1. Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = parseFloat(urlParams.get('lat')) || 40.7128; // Default to NYC
+        const lng = parseFloat(urlParams.get('lng')) || -74.0060;
+        const zoom = parseInt(urlParams.get('zoom')) || 15;
+        const cameraName = urlParams.get('name') || 'Default Camera';
+        const riskLevel = urlParams.get('risk') || 'UNKNOWN';
+
+        // 2. Initialize Leaflet map
+        map = L.map('map', {
+            center: [lat, lng],
+            zoom: zoom,
+            zoomControl: false // Disable default zoom control
+        });
+
+        // 3. Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // 4. Add a marker
+        const marker = L.marker([lat, lng]).addTo(map);
+
+        // 5. Add a popup to the marker
+        marker.bindPopup(`<b>${cameraName}</b><br>Risk: ${riskLevel}`).openPopup();
+    }
+
+    // --- JavaScript functions for Android to call ---
+
+    function zoomIn() {
+        if (map) map.zoomIn();
+    }
+
+    function zoomOut() {
+        if (map) map.zoomOut();
+    }
+
+    function centerMap(lat, lng) {
+        if (map) {
+            map.setView([lat, lng], 15);
+        }
+    }
+
+    // Initialize the map on load
+    window.onload = initMap;
+</script>
+
+</body>
+</html>
