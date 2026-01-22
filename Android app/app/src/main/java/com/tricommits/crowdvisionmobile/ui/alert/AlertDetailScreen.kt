@@ -39,7 +39,8 @@ import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 @Composable
 fun AlertDetailScreen(
     alert: Alert,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onViewOnMap: (Double, Double) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -89,17 +90,17 @@ fun AlertDetailScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Message: High crowd density detected.", style = MaterialTheme.typography.bodyLarge)
+                    Text("Message: ${alert.message}", style = MaterialTheme.typography.bodyLarge)
                     Text("Timestamp: ${alert.timestamp}", style = MaterialTheme.typography.bodyMedium)
                     Text("Camera ID: ${alert.id}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Location: 40.7128° N, 74.0060° W", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Location: ${alert.latitude}, ${alert.longitude}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
 
             // Action Buttons
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Button(
-                    onClick = { /* TODO: Open Map */ },
+                    onClick = { onViewOnMap(alert.latitude, alert.longitude) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("View Location on Map")
@@ -120,7 +121,7 @@ fun AlertDetailScreen(
 @Composable
 fun AlertDetailScreenPreview() {
     CrowdVisionMobileTheme {
-        val sampleAlert = Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING")
-        AlertDetailScreen(alert = sampleAlert, onBack = {})
+        val sampleAlert = Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
+        AlertDetailScreen(alert = sampleAlert, onBack = {}, onViewOnMap = { _, _ -> })
     }
 }

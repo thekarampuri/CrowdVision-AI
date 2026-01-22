@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import com.tricommits.crowdvisionmobile.ui.alert.Alert
 import com.tricommits.crowdvisionmobile.ui.alert.AlertDetailScreen
 import com.tricommits.crowdvisionmobile.ui.alert.AlertListScreen
+import com.tricommits.crowdvisionmobile.ui.map.MapScreen
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +45,30 @@ fun CrowdVisionNavHost() {
         ) { backStackEntry ->
             val json = backStackEntry.arguments?.getString("alertJson")
             val alert = Gson().fromJson(json, Alert::class.java)
-            AlertDetailScreen(alert = alert, onBack = { navController.popBackStack() })
+            AlertDetailScreen(
+                alert = alert,
+                onBack = { navController.popBackStack() },
+                onViewOnMap = { latitude, longitude ->
+                    navController.navigate("map/$latitude/$longitude")
+                }
+            )
+        }
+        composable(
+            "map/{latitude}/{longitude}",
+            arguments = listOf(
+                navArgument("latitude") { type = NavType.FloatType },
+                navArgument("longitude") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+            val latitude = backStackEntry.arguments?.getFloat("latitude")?.toDouble()
+            val longitude = backStackEntry.arguments?.getFloat("longitude")?.toDouble()
+            if (latitude != null && longitude != null) {
+                MapScreen(
+                    latitude = latitude,
+                    longitude = longitude,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

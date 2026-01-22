@@ -27,9 +27,9 @@ import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 @Composable
 fun AlertListScreen(onAlertClick: (Alert) -> Unit) {
     val alerts = listOf(
-        Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING"),
-        Alert("2", "Main Hall Cam", "WARNING", "2024-09-15 10:28:00", "PENDING"),
-        Alert("3", "Exit Cam", "SAFE", "2024-09-15 10:25:00", "COMPLETED"),
+        Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060),
+        Alert("2", "Main Hall Cam", "WARNING", "2024-09-15 10:28:00", "PENDING", "Unusual crowd formation detected.", 34.0522, -118.2437),
+        Alert("3", "Exit Cam", "SAFE", "2024-09-15 10:25:00", "COMPLETED", "Crowd flow is normal.", 51.5074, -0.1278),
     )
 
     Box {

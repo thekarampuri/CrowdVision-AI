@@ -8,14 +8,20 @@ data class Alert(
     val cameraName: String,
     val riskLevel: String,
     val timestamp: String,
-    val status: String
+    val status: String,
+    val message: String?,
+    val latitude: Double,
+    val longitude: Double
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString()!!
+        parcel.readString()!!,
+        parcel.readString(),
+        parcel.readDouble(),
+        parcel.readDouble()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -24,6 +30,9 @@ data class Alert(
         parcel.writeString(riskLevel)
         parcel.writeString(timestamp)
         parcel.writeString(status)
+        parcel.writeString(message)
+        parcel.writeDouble(latitude)
+        parcel.writeDouble(longitude)
     }
 
     override fun describeContents(): Int {

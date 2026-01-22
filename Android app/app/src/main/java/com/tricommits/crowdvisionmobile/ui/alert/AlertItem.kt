@@ -119,7 +119,7 @@ fun Badge(
 @Composable
 fun AlertItemPreview() {
     CrowdVisionMobileTheme {
-        val sampleAlert = Alert("1", "Main Street Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING")
+        val sampleAlert = Alert("1", "Main Street Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
         AlertItem(
             alert = sampleAlert,
             onClick = {}
