@@ -51,30 +51,29 @@ export function WebcamFeed({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isWebcamActive, setIsWebcamActive] = useState(false);
-  const [isWebcamEnabled, setIsWebcamEnabled] = useState(
-    camera.id === "CAM-001",
-  );
+  // Default to OFF; user must enable manually
+  const [isWebcamEnabled, setIsWebcamEnabled] = useState(false);
   const [detections, setDetections] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mlServerConnected, setMlServerConnected] = useState(true);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  useEffect(() => {
-    if (
-      camera.status === "online" &&
-      isWebcamEnabled &&
-      camera.id === "CAM-001"
-    ) {
+useEffect(() => {
+  // Only initialize when the camera is online and explicitly enabled
+  if (camera.status === "online" && camera.id === "CAM-001" && isWebcamEnabled) {
+    if (!streamRef.current) {
       initializeWebcam();
-    } else {
+    }
+  }
+
+  // If camera goes offline or is disabled, ensure webcam is stopped
+  if (camera.status !== "online" || camera.id !== "CAM-001" || !isWebcamEnabled) {
+    if (streamRef.current) {
       stopWebcam();
     }
-
-    return () => {
-      stopWebcam();
-    };
-  }, [camera.status, isWebcamEnabled, camera.id]);
+  }
+}, [camera.status, isWebcamEnabled, camera.id]);
 
   // Handle window visibility change to stop webcam in background
   useEffect(() => {
@@ -88,8 +87,8 @@ export function WebcamFeed({
         isWebcamEnabled &&
         camera.id === "CAM-001"
       ) {
-        console.log("[Webcam] Tab visible, restarting webcam");
-        setIsWebcamEnabled(true); // This will trigger initialization
+        // Do not auto-restart on visibility change to avoid loops
+        console.log("[Webcam] Tab visible, not auto-restarting webcam");
       }
     };
 
@@ -150,7 +149,7 @@ export function WebcamFeed({
     }
   };
 
-  const stopWebcam = () => {
+const stopWebcam = () => {
     console.log("[Webcam] Stopping webcam completely");
     
     // Explicitly stop all tracks
@@ -164,12 +163,9 @@ export function WebcamFeed({
 
     if (videoRef.current) {
       videoRef.current.srcObject = null;
-      videoRef.current.load(); // Force reload to clear buffer
-      // Remove video element from DOM to prevent background processing
-      if (videoRef.current.parentNode) {
-        const clone = videoRef.current.cloneNode(false) as HTMLVideoElement;
-        videoRef.current.parentNode.replaceChild(clone, videoRef.current);
-      }
+      // Pause playback and let browser clean up. Do not manipulate the DOM structure
+      videoRef.current.pause();
+      videoRef.current.load(); // Clear any buffered data
     }
 
     setIsWebcamActive(false);
@@ -190,14 +186,12 @@ export function WebcamFeed({
   };
 
   const toggleWebcam = () => {
-    if (camera.id === "CAM-001") {
-      if (isWebcamEnabled) {
-        // If currently enabled, stop completely
-        stopWebcam();
-      } else {
-        // If currently disabled, enable and initialize
-        setIsWebcamEnabled(true);
-      }
+    if (camera.id !== "CAM-001") return;
+    if (isWebcamEnabled) {
+      stopWebcam();
+    } else {
+      setIsWebcamEnabled(true);
+      if (camera.status === "online" && !streamRef.current) initializeWebcam();
     }
   };
 
