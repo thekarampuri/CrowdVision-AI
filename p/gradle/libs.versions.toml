@@ -14,7 +14,7 @@ navCompose = "2.8.0-beta05"
 firebaseBom = "33.0.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-websocket = "1.0.1"
+websocket = "1.6.0"
 coroutines = "1.8.1"
 
 [libraries]
@@ -65,4 +65,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 

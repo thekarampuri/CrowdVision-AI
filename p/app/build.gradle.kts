@@ -43,6 +43,10 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy.force("org.java-websocket:Java-WebSocket:1.6.0")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -52,6 +56,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -74,7 +79,7 @@ dependencies {
     implementation(libs.okhttp.logging)
 
     // WebSocket
-    implementation(libs.websocket.okhttp)
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
 
     // Coroutines
     implementation(libs.coroutines.core)
@@ -82,6 +87,10 @@ dependencies {
 
     // Gson
     implementation(libs.gson)
+
+    // Google Maps
+    implementation("com.google.maps.android:maps-compose:7.0.0")
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

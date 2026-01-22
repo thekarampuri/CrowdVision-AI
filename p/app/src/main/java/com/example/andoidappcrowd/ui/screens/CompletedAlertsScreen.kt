@@ -7,7 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -215,29 +214,6 @@ fun CompletedStatusBadge(status: String) {
         "acknowledged" -> Color(0xFFFF9800) to "Acknowledged"
         "resolved" -> Color.Green to "Resolved"
         else -> Color.Gray to "Unknown"
-    }
-    
-    Surface(
-        shape = MaterialTheme.shapes.small,
-        color = color.copy(alpha = 0.2f)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-fun SeverityBadge(severity: String) {
-    val (color, text) = when (severity.lowercase()) {
-        "high" -> Color.Red to "HIGH"
-        "medium" -> Color(0xFFFF9800) to "MEDIUM"
-        "low" -> Color.Green to "LOW"
-        else -> Color.Gray to "UNKNOWN"
     }
     
     Surface(

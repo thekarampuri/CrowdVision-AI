@@ -2,7 +2,6 @@ package com.example.andoidappcrowd.di
 
 import com.example.andoidappcrowd.data.api.CrowdVisionApi
 import com.example.andoidappcrowd.data.repository.CrowdVisionRepository
-import com.example.andoidappcrowd.data.websocket.WebSocketManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -62,13 +61,7 @@ object NetworkModule {
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
-    
-    @Provides
-    @Singleton
-    fun provideWebSocketManager(): WebSocketManager {
-        return WebSocketManager()
-    }
-    
+
     @Provides
     @Singleton
     fun provideCrowdVisionRepository(

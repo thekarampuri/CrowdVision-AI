@@ -10,11 +10,10 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CrowdVisionRepository @Inject constructor(
+class CrowdVisionRepository(
     private val api: CrowdVisionApi,
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
@@ -215,7 +214,7 @@ class CrowdVisionRepository @Inject constructor(
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
-                    return@addSnapshotListener
+                    return@addSNapshotListener
                 }
                 
                 val cameras = snapshot?.toObjects(Camera::class.java) ?: emptyList()

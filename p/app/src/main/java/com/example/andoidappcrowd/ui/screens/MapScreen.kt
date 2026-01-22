@@ -1,8 +1,7 @@
 package com.example.andoidappcrowd.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Error
@@ -18,6 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.andoidappcrowd.data.model.Camera
 import com.example.andoidappcrowd.viewmodel.CrowdVisionViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,17 +104,19 @@ fun MapScreen(
                 }
                 
                 else -> {
-                    LazyColumn(
+                    val cameraPositionState = rememberCameraPositionState {
+                        position = CameraPosition.fromLatLngZoom(LatLng(40.7128, -74.0060), 10f)
+                    }
+                    GoogleMap(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        cameraPositionState = cameraPositionState
                     ) {
-                        item {
-                            AnalyticsSummary(cameras = cameras)
-                        }
-                        
-                        items(cameras) { camera ->
-                            CameraCard(camera = camera)
+                        cameras.forEach { camera ->
+                            Marker(
+                                state = MarkerState(position = LatLng(camera.latitude.toDouble(), camera.longitude.toDouble())),
+                                title = camera.name,
+                                snippet = "People: ${camera.peopleCount}"
+                            )
                         }
                     }
                 }
