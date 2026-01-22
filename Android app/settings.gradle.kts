@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Field Officer"
+rootProject.name = "CrowdVisionMobile"
 include(":app")

@@ -1,4 +1,4 @@
-package com.example.android.ui.theme
+package com.tricommits.crowdvisionmobile.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -34,7 +34,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun AndroidTheme(
+fun CrowdVisionMobileTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

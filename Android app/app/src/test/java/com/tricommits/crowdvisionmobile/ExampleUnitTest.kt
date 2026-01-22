@@ -1,4 +1,4 @@
-package com.example.android
+package com.tricommits.crowdvisionmobile
 
 import org.junit.Test
 
