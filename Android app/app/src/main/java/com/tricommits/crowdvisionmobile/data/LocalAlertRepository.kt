@@ -1,76 +1,40 @@
+
 package com.tricommits.crowdvisionmobile.data
 
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import java.util.ArrayList
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.tricommits.crowdvisionmobile.ui.alert.Alert
 
-/**
- * Data model for an Alert.
- */
-data class Alert(
-    val alertId: String,
-    val cameraName: String,
-    val latitude: Double,
-    val longitude: Double,
-    val riskLevel: String,
-    val message: String,
-    val timestamp: Long,
-    var status: String // "PENDING" or "COMPLETED"
-)
+object LocalAlertRepository {
 
-/**
- * Repository to manage alerts locally in-memory.
- * Simulates backend behavior.
- */
-class LocalAlertRepository private constructor() {
+    private val sampleAlerts = mutableListOf(
+        Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060),
+        Alert("2", "Main Hall Cam", "WARNING", "2024-09-15 10:28:00", "PENDING", "Unusual crowd formation detected.", 34.0522, -118.2437),
+        Alert("3", "Exit Cam", "SAFE", "2024-09-15 10:25:00", "COMPLETED", "Crowd flow is normal.", 51.5074, -0.1278),
+        Alert("4", "Plaza Cam", "CRITICAL", "2024-09-15 11:00:00", "PENDING", "Sudden surge in crowd numbers.", 48.8584, 2.2945),
+        Alert("5", "West Wing", "COMPLETED", "2024-09-14 09:00:00", "COMPLETED", "All clear.", 35.6895, 139.6917)
+    )
 
-    // In-memory storage
-    private val alerts = ArrayList<Alert>()
-    
-    // Mutex for thread safety
-    private val mutex = Mutex()
+    private val alertsLiveData = MutableLiveData<List<Alert>>(sampleAlerts)
 
-    /**
-     * Get all active alerts (status == PENDING).
-     */
-    suspend fun getActiveAlerts(): List<Alert> = mutex.withLock {
-        alerts.filter { it.status == "PENDING" }
-    }
+    fun getAlerts(): LiveData<List<Alert>> = alertsLiveData
 
-    /**
-     * Get the full history of alerts.
-     */
-    suspend fun getAlertHistory(): List<Alert> = mutex.withLock {
-        // Return a copy to avoid modification issues
-        ArrayList(alerts)
-    }
-
-    /**
-     * Mark an alert as COMPLETED by its ID.
-     */
-    suspend fun markAlertCompleted(alertId: String) = mutex.withLock {
-        val index = alerts.indexOfFirst { it.alertId == alertId }
-        if (index != -1) {
-            val alert = alerts[index]
-            // Update the status
-            alerts[index] = alert.copy(status = "COMPLETED")
+    fun addAlert(alert: Alert) {
+        synchronized(this) {
+            val currentList = alertsLiveData.value?.toMutableList() ?: mutableListOf()
+            currentList.add(0, alert) // Add to the top
+            alertsLiveData.postValue(currentList)
         }
     }
 
-    /**
-     * Add a new alert to the repository.
-     */
-    suspend fun addAlert(alert: Alert) = mutex.withLock {
-        alerts.add(alert)
-    }
-
-    companion object {
-        @Volatile
-        private var INSTANCE: LocalAlertRepository? = null
-
-        fun getInstance(): LocalAlertRepository {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: LocalAlertRepository().also { INSTANCE = it }
+    fun markAlertAsCompleted(alertId: String) {
+        synchronized(this) {
+            val currentList = alertsLiveData.value?.toMutableList() ?: return
+            val alertIndex = currentList.indexOfFirst { it.id == alertId }
+            if (alertIndex != -1) {
+                val updatedAlert = currentList[alertIndex].copy(status = "COMPLETED")
+                currentList[alertIndex] = updatedAlert
+                alertsLiveData.postValue(currentList)
             }
         }
     }

@@ -5,17 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.gson.Gson
-import com.tricommits.crowdvisionmobile.ui.alert.Alert
 import com.tricommits.crowdvisionmobile.ui.alert.AlertDetailScreen
 import com.tricommits.crowdvisionmobile.ui.alert.AlertListScreen
 import com.tricommits.crowdvisionmobile.ui.map.MapScreen
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
+import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,38 +32,46 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CrowdVisionNavHost() {
     val navController = rememberNavController()
+    val alertViewModel: AlertViewModel = viewModel()
+
     NavHost(navController = navController, startDestination = "alerts") {
         composable("alerts") {
-            AlertListScreen(onAlertClick = {
-                val json = Gson().toJson(it)
-                navController.navigate("alertDetail/$json")
-            })
-        }
-        composable(
-            "alertDetail/{alertJson}",
-            arguments = listOf(navArgument("alertJson") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val json = backStackEntry.arguments?.getString("alertJson")
-            val alert = Gson().fromJson(json, Alert::class.java)
-            AlertDetailScreen(
-                alert = alert,
-                onBack = { navController.popBackStack() },
-                onViewOnMap = { selectedAlert ->
-                    val alertJson = Gson().toJson(selectedAlert)
-                    navController.navigate("map/$alertJson")
+            AlertListScreen(
+                viewModel = alertViewModel,
+                onAlertClick = { alert ->
+                    navController.navigate("alertDetail/${alert.id}")
                 }
             )
         }
         composable(
-            "map/{alertJson}",
-            arguments = listOf(navArgument("alertJson") { type = NavType.StringType })
+            "alertDetail/{alertId}",
+            arguments = listOf(navArgument("alertId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val json = backStackEntry.arguments?.getString("alertJson")
-            val alert = Gson().fromJson(json, Alert::class.java)
-            MapScreen(
-                alert = alert,
-                onBack = { navController.popBackStack() }
-            )
+            val alertId = backStackEntry.arguments?.getString("alertId")
+            val alert = alertViewModel.getAlertById(alertId ?: "")
+            if (alert != null) {
+                AlertDetailScreen(
+                    alert = alert,
+                    viewModel = alertViewModel,
+                    onBack = { navController.popBackStack() },
+                    onViewOnMap = { selectedAlert ->
+                        navController.navigate("map/${selectedAlert.id}")
+                    }
+                )
+            }
+        }
+        composable(
+            "map/{alertId}",
+            arguments = listOf(navArgument("alertId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val alertId = backStackEntry.arguments?.getString("alertId")
+            val alert = alertViewModel.getAlertById(alertId ?: "")
+            if (alert != null) {
+                MapScreen(
+                    alert = alert,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

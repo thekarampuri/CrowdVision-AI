@@ -33,12 +33,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
+import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertDetailScreen(
     alert: Alert,
+    viewModel: AlertViewModel,
     onBack: () -> Unit,
     onViewOnMap: (Alert) -> Unit
 ) {
@@ -107,8 +110,12 @@ fun AlertDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick = { /* TODO: Mark as completed */ },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = { 
+                        viewModel.markAlertAsCompleted(alert.id)
+                        onBack() 
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = alert.status == "PENDING"
                 ) {
                     Text("Mark as Completed")
                 }
@@ -122,6 +129,6 @@ fun AlertDetailScreen(
 fun AlertDetailScreenPreview() {
     CrowdVisionMobileTheme {
         val sampleAlert = Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
-        AlertDetailScreen(alert = sampleAlert, onBack = {}, onViewOnMap = { })
+        AlertDetailScreen(alert = sampleAlert, viewModel = viewModel(), onBack = {}, onViewOnMap = { })
     }
 }
