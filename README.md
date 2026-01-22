@@ -216,9 +216,9 @@ CrowdVision-AI/
 - **Detection Class**: Person (COCO class ID: 0)
 
 ### Risk Level Thresholds
-- **Low** (Safe): 0-100 people
-- **Medium** (Warning): 101-250 people
-- **High** (Critical): 251+ people
+- **Low** (Safe): 0 people
+- **Medium** (Warning): 1-9 people
+- **High** (Critical): 10+ people
 
 ---
 

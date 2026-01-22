@@ -38,6 +38,7 @@ interface DetectionResult {
   count: number;
   riskLevel: "low" | "medium" | "high";
   boundingBoxes: Array<{ x: number; y: number; width: number; height: number }>;
+  gatherings?: number;
 }
 
 export function WebcamFeed({
@@ -88,7 +89,7 @@ export function WebcamFeed({
         camera.id === "CAM-001"
       ) {
         console.log("[Webcam] Tab visible, restarting webcam");
-        initializeWebcam();
+        setIsWebcamEnabled(true); // This will trigger initialization
       }
     };
 
@@ -101,8 +102,10 @@ export function WebcamFeed({
   // New effect to attach stream when video element becomes available
   useEffect(() => {
     if (isWebcamActive && videoRef.current && streamRef.current) {
+      console.log("[Webcam] Attaching stream to video element");
       videoRef.current.srcObject = streamRef.current;
       videoRef.current.onloadedmetadata = () => {
+        console.log("[Webcam] Video metadata loaded, starting playback");
         videoRef.current?.play().catch((e) => console.error("Play error:", e));
         startDetection();
       };
@@ -111,20 +114,31 @@ export function WebcamFeed({
 
   const initializeWebcam = async () => {
     try {
+      console.log("[Webcam] Initializing webcam...");
+      
       // Check if we already have a stream to avoid double requests
-      if (streamRef.current) return;
+      if (streamRef.current) {
+        console.log("[Webcam] Stream already exists");
+        return;
+      }
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true, // Simplified constraints for better compatibility
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
       });
 
       // Check if component was disabled while we were waiting
       if (!isWebcamEnabled) {
+        console.log("[Webcam] Component disabled while initializing, stopping stream");
         stream.getTracks().forEach((t) => t.stop());
         return;
       }
 
       streamRef.current = stream;
+      console.log("[Webcam] Stream obtained successfully");
+      
       // Set active to true to mount the video element in the DOM
       setIsWebcamActive(true);
       setError(null);
@@ -137,9 +151,12 @@ export function WebcamFeed({
   };
 
   const stopWebcam = () => {
+    console.log("[Webcam] Stopping webcam completely");
+    
     // Explicitly stop all tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => {
+        console.log("[Webcam] Stopping track:", track.kind);
         track.stop();
       });
       streamRef.current = null;
@@ -148,19 +165,39 @@ export function WebcamFeed({
     if (videoRef.current) {
       videoRef.current.srcObject = null;
       videoRef.current.load(); // Force reload to clear buffer
+      // Remove video element from DOM to prevent background processing
+      if (videoRef.current.parentNode) {
+        const clone = videoRef.current.cloneNode(false) as HTMLVideoElement;
+        videoRef.current.parentNode.replaceChild(clone, videoRef.current);
+      }
     }
 
     setIsWebcamActive(false);
+    setIsWebcamEnabled(false); // Also disable the webcam when stopped
 
     if (detectionIntervalRef.current) {
       clearInterval(detectionIntervalRef.current);
       detectionIntervalRef.current = null;
     }
+
+    // Clear canvas
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+    }
   };
 
   const toggleWebcam = () => {
     if (camera.id === "CAM-001") {
-      setIsWebcamEnabled((prev) => !prev);
+      if (isWebcamEnabled) {
+        // If currently enabled, stop completely
+        stopWebcam();
+      } else {
+        // If currently disabled, enable and initialize
+        setIsWebcamEnabled(true);
+      }
     }
   };
 
@@ -200,7 +237,7 @@ export function WebcamFeed({
         onDetectionUpdate(camera.id, result);
       }
 
-      // Only create HIGH RISK alerts when count >= 10
+      // Only create HIGH RISK alerts when count >= 10 (matching ML server thresholds)
       // Check for existing high risk alert within last 1 minute
       if (result.count >= 10) {
         const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 1);
@@ -278,12 +315,12 @@ export function WebcamFeed({
         };
       });
 
-      // Calculate risk level based on count
+      // Calculate risk level based on count - matching ML server thresholds
       // low: 0, medium: 1-9, high: 10+
       let riskLevel: "low" | "medium" | "high" = "low";
       if (data.count >= 10) {
         riskLevel = "high";
-      } else if (data.count >= 1 && data.count <= 9) {
+      } else if (data.count >= 1) {
         riskLevel = "medium";
       }
 
@@ -520,9 +557,9 @@ export function WebcamFeed({
                     size="sm"
                     variant="ghost"
                     onClick={toggleWebcam}
-                    className="bg-green-500/30 hover:bg-green-500/50 text-green-300 flex items-center gap-2"
+                    className="bg-red-500/30 hover:bg-red-500/50 text-red-300 flex items-center gap-2"
                   >
-                    <Video className="w-4 h-4" />
+                    <VideoOff className="w-4 h-4" />
                     <span className="text-xs font-semibold">Turn Off</span>
                   </Button>
                   <Button
