@@ -23,17 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tricommits.crowdvisionmobile.R
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 
-data class Alert(
-    val id: String,
-    val cameraName: String,
-    val riskLevel: String,
-    val timestamp: String,
-    val status: String
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlertListScreen() {
+fun AlertListScreen(onAlertClick: (Alert) -> Unit) {
     val alerts = listOf(
         Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING"),
         Alert("2", "Main Hall Cam", "WARNING", "2024-09-15 10:28:00", "PENDING"),
@@ -65,12 +57,10 @@ fun AlertListScreen() {
             containerColor = Color.Transparent
         ) { paddingValues ->
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                items(alerts) {
-                    alert -> AlertItem(
-                        cameraName = alert.cameraName,
-                        riskLevel = alert.riskLevel,
-                        timestamp = alert.timestamp,
-                        status = alert.status
+                items(alerts) { alert ->
+                    AlertItem(
+                        alert = alert,
+                        onClick = { onAlertClick(alert) }
                     )
                 }
             }
@@ -82,6 +72,6 @@ fun AlertListScreen() {
 @Composable
 fun AlertListScreenPreview() {
     CrowdVisionMobileTheme {
-        AlertListScreen()
+        AlertListScreen(onAlertClick = {})
     }
 }

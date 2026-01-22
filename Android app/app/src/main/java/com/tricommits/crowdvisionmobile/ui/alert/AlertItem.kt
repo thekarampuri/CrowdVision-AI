@@ -2,7 +2,15 @@
 package com.tricommits.crowdvisionmobile.ui.alert
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -20,16 +28,15 @@ import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 
 @Composable
 fun AlertItem(
-    cameraName: String,
-    riskLevel: String,
-    timestamp: String,
-    status: String,
+    alert: Alert,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f))
@@ -43,22 +50,22 @@ fun AlertItem(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = cameraName,
+                    text = alert.cameraName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = timestamp,
+                    text = alert.timestamp,
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                RiskLevelBadge(riskLevel = riskLevel)
+                RiskLevelBadge(riskLevel = alert.riskLevel)
                 Spacer(modifier = Modifier.height(4.dp))
-                StatusBadge(status = status)
+                StatusBadge(status = alert.status)
             }
         }
     }
@@ -112,11 +119,10 @@ fun Badge(
 @Composable
 fun AlertItemPreview() {
     CrowdVisionMobileTheme {
+        val sampleAlert = Alert("1", "Main Street Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING")
         AlertItem(
-            cameraName = "Main Street Cam",
-            riskLevel = "CRITICAL",
-            timestamp = "2024-09-15 10:30:00",
-            status = "PENDING"
+            alert = sampleAlert,
+            onClick = {}
         )
     }
 }
