@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +31,8 @@ import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 fun AlertItem(
     alert: Alert,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showMessage: Boolean = false
 ) {
     Card(
         modifier = modifier
@@ -61,6 +63,15 @@ fun AlertItem(
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
+                if (showMessage) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = alert.message ?: "",
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 RiskLevelBadge(riskLevel = alert.riskLevel)
@@ -122,7 +133,8 @@ fun AlertItemPreview() {
         val sampleAlert = Alert("1", "Main Street Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
         AlertItem(
             alert = sampleAlert,
-            onClick = {}
+            onClick = {},
+            showMessage = true
         )
     }
 }

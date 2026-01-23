@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -31,7 +32,8 @@ import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 @Composable
 fun AlertListScreen(
     viewModel: AlertViewModel,
-    onAlertClick: (Alert) -> Unit
+    onAlertClick: (Alert) -> Unit,
+    onHistoryClick: () -> Unit
 ) {
     val activeAlerts by viewModel.activeAlerts.observeAsState(emptyList())
 
@@ -49,6 +51,11 @@ fun AlertListScreen(
                         Column {
                             Text(text = "CrowdVision Alerts")
                             Text(text = "Real-time Crowd Risk Updates", style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    actions = {
+                        TextButton(onClick = onHistoryClick) {
+                            Text("View History")
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -75,6 +82,6 @@ fun AlertListScreen(
 @Composable
 fun AlertListScreenPreview() {
     CrowdVisionMobileTheme {
-        AlertListScreen(viewModel = viewModel(), onAlertClick = {})
+        AlertListScreen(viewModel = viewModel(), onAlertClick = {}, onHistoryClick = {})
     }
 }

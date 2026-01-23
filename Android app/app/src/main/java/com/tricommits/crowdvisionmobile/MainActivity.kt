@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tricommits.crowdvisionmobile.ui.alert.AlertDetailScreen
+import com.tricommits.crowdvisionmobile.ui.alert.AlertHistoryScreen
 import com.tricommits.crowdvisionmobile.ui.alert.AlertListScreen
 import com.tricommits.crowdvisionmobile.ui.map.MapScreen
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
@@ -38,6 +39,16 @@ fun CrowdVisionNavHost() {
         composable("alerts") {
             AlertListScreen(
                 viewModel = alertViewModel,
+                onAlertClick = { alert ->
+                    navController.navigate("alertDetail/${alert.id}")
+                },
+                onHistoryClick = { navController.navigate("history") }
+            )
+        }
+        composable("history") {
+            AlertHistoryScreen(
+                viewModel = alertViewModel,
+                onBack = { navController.popBackStack() },
                 onAlertClick = { alert ->
                     navController.navigate("alertDetail/${alert.id}")
                 }
