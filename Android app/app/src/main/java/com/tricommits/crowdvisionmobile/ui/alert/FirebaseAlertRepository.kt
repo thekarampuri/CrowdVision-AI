@@ -33,40 +33,38 @@ class FirebaseAlertRepository {
     private fun QuerySnapshot.toAlerts(): List<Alert> {
         return documents.mapNotNull { doc ->
             try {
-                val alertId = doc.getString("alertId")
+                val alertId = doc.id
                 val cameraName = doc.getString("cameraName")
-                val riskLevel = doc.getString("riskLevel")
-                
+                val riskLevel = doc.getString("severity")
+                val status = doc.getString("status")
+                val message = doc.getString("description")
+
+                // Robustly get latitude and longitude, which might be stored as Long or Double
+                val latitude = (doc.get("latitude") as? Number)?.toDouble()
+                val longitude = (doc.get("longitude") as? Number)?.toDouble()
+
                 // Robust timestamp handling
                 val timestampData = doc.get("timestamp")
                 val timestamp: String? = when (timestampData) {
                     is Timestamp -> timestampData.toDate().toString()
                     is String -> timestampData
                     is Long -> timestampData.toString()
-                    else -> {
-                        Log.w("FirebaseAlertRepository", "Unknown timestamp format for doc ${doc.id}: ${timestampData?.javaClass?.name}")
-                        null
-                    }
+                    else -> null
                 }
 
-                val status = doc.getString("status")
-                val message = doc.getString("message")
-                val latitude = doc.getDouble("latitude")
-                val longitude = doc.getDouble("longitude")
-
-                if (alertId != null && cameraName != null && riskLevel != null && timestamp != null && status != null && latitude != null && longitude != null) {
+                if (cameraName != null && riskLevel != null && timestamp != null && status != null && latitude != null && longitude != null) {
                     Alert(
-                        id = alertId, // Firestore "alertId" maps to Alert "id"
+                        id = alertId,
                         cameraName = cameraName,
                         riskLevel = riskLevel,
                         timestamp = timestamp,
-                        status = status,
-                        message = message, // message can be null
+                        status = if (status == "active") "PENDING" else status,
+                        message = message,
                         latitude = latitude,
                         longitude = longitude
                     )
                 } else {
-                    Log.w("FirebaseAlertRepository", "Skipping document ${doc.id} due to missing fields.")
+                    Log.w("FirebaseAlertRepository", "Skipping document ${doc.id} due to missing or invalid fields.")
                     null
                 }
             } catch (e: Exception) {
@@ -77,7 +75,8 @@ class FirebaseAlertRepository {
     }
 
     fun updateAlertStatus(alertId: String, status: String) {
-        alertsCollection.document(alertId).update("status", status)
+        val firestoreStatus = if (status == "COMPLETED") "resolved" else status
+        alertsCollection.document(alertId).update("status", firestoreStatus)
             .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert status updated for $alertId") }
             .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error updating alert status for $alertId", e) }
     }
