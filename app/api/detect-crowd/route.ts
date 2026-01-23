@@ -50,16 +50,22 @@ export async function POST(request: NextRequest) {
       // 3. Handle Alerts
       if (mlDetections.riskLevel === "high") {
         try {
-          await addDoc(collection(db, "alerts"), {
+          await addDoc(collection(db, "high_risk_alerts"), {
             cameraId,
-            count: mlDetections.count,
-            riskLevel: mlDetections.riskLevel,
+            peopleCount: mlDetections.count, // Rename count to peopleCount
+            severity: "critical", // Map high risk to critical severity
+            status: "active",
             timestamp: serverTimestamp(),
-            acknowledged: false,
-            location: "Main Entrance",
-            message: `High risk detected: ${mlDetections.count} people`,
+            acknowledgedAt: null,
+            resolvedAt: null,
+            location: "Main Entrance", // Or "Laptop" as per user example, sticking to efficient default
+            cameraName: "Web Cam",
+            title: `High Crowd Density - Web Cam`,
+            description: `Critical: Crowd count has exceeded threshold with ${mlDetections.count} people detected`,
+            latitude: 17.66876981675993, // Hardcoded as per user example/request context
+            longitude: 75.92227938705744,
           });
-          console.log("[API] Alert stored in Firestore");
+          console.log("[API] Critical alert stored in high_risk_alerts");
         } catch (firestoreError) {
           console.error("[API] Firestore Error:", firestoreError);
         }
