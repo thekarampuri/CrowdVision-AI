@@ -10,7 +10,7 @@ import com.google.firebase.firestore.QuerySnapshot
 class FirebaseAlertRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
-    private val alertsCollection = firestore.collection("alerts")
+    private val alertsCollection = firestore.collection("high_risk_alerts")
 
     fun getAlerts(): LiveData<List<Alert>> {
         val alerts = MutableLiveData<List<Alert>>(emptyList()) // Initialize with empty list

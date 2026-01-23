@@ -79,7 +79,7 @@ fun AlertDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row {
-                        RiskLevelBadge(riskLevel = alert.riskLevel)
+                        RiskLevelBadge(riskLevel = alert.severity)
                         Spacer(modifier = Modifier.width(8.dp))
                         StatusBadge(status = alert.status)
                     }
@@ -93,7 +93,7 @@ fun AlertDetailScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Message: ${alert.message}", style = MaterialTheme.typography.bodyLarge)
+                    Text("Message: ${alert.description}", style = MaterialTheme.typography.bodyLarge)
                     Text("Timestamp: ${alert.timestamp}", style = MaterialTheme.typography.bodyMedium)
                     Text("Camera ID: ${alert.id}", style = MaterialTheme.typography.bodyMedium)
                     Text("Location: ${alert.latitude}, ${alert.longitude}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)

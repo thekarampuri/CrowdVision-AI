@@ -66,7 +66,7 @@ fun AlertItem(
                 if (showMessage) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = alert.message ?: "",
+                        text = alert.description ?: "",
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -74,7 +74,7 @@ fun AlertItem(
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                RiskLevelBadge(riskLevel = alert.riskLevel)
+                RiskLevelBadge(riskLevel = alert.severity)
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusBadge(status = alert.status)
             }
