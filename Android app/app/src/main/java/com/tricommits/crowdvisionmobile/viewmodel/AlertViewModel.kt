@@ -1,15 +1,14 @@
-
 package com.tricommits.crowdvisionmobile.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
-import com.tricommits.crowdvisionmobile.data.LocalAlertRepository
 import com.tricommits.crowdvisionmobile.ui.alert.Alert
+import com.tricommits.crowdvisionmobile.ui.alert.FirebaseAlertRepository
 
 class AlertViewModel : ViewModel() {
 
-    private val repository = LocalAlertRepository
+    private val repository = FirebaseAlertRepository()
 
     val allAlerts: LiveData<List<Alert>> = repository.getAlerts()
 
@@ -24,14 +23,10 @@ class AlertViewModel : ViewModel() {
     }
 
     fun markAlertAsCompleted(alertId: String) {
-        repository.markAlertAsCompleted(alertId)
+        repository.updateAlertStatus(alertId, "COMPLETED")
     }
 
     fun getAlertById(alertId: String): Alert? {
         return allAlerts.value?.find { it.id == alertId }
-    }
-    
-    fun addAlert(alert: Alert) {
-        repository.addAlert(alert)
     }
 }
