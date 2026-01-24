@@ -26,9 +26,10 @@ class CrowdVisionMessagingService : FirebaseMessagingService() {
 
         Log.d(TAG, "From: ${remoteMessage.from}")
 
-        remoteMessage.notification?.let {
-            sendNotification(it.title, it.body, remoteMessage.data)
-        }
+        // Handle data payload
+        val title = remoteMessage.data["title"]
+        val body = remoteMessage.data["body"]
+        sendNotification(title, body, remoteMessage.data)
     }
 
     private fun sendNotification(title: String?, body: String?, data: Map<String, String>) {
@@ -46,7 +47,7 @@ class CrowdVisionMessagingService : FirebaseMessagingService() {
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
 
-        if (riskLevel == "CRITICAL") {
+        if (riskLevel == "critical") {
             notificationBuilder.priority = NotificationCompat.PRIORITY_HIGH
         }
 
@@ -54,7 +55,7 @@ class CrowdVisionMessagingService : FirebaseMessagingService() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Default Channel", NotificationManager.IMPORTANCE_DEFAULT)
-            if (riskLevel == "CRITICAL") {
+            if (riskLevel == "critical") {
                 channel.importance = NotificationManager.IMPORTANCE_HIGH
             }
             notificationManager.createNotificationChannel(channel)

@@ -86,4 +86,10 @@ class FirebaseAlertRepository {
             .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert status updated for $alertId") }
             .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error updating alert status for $alertId", e) }
     }
+
+    fun deleteAlert(alertId: String) {
+        alertsCollection.document(alertId).delete()
+            .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert deleted: $alertId") }
+            .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error deleting alert: $alertId", e) }
+    }
 }

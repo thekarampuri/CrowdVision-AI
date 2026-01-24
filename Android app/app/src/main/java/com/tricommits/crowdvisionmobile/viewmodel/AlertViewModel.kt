@@ -26,6 +26,10 @@ class AlertViewModel : ViewModel() {
         repository.updateAlertStatus(alertId, "COMPLETED")
     }
 
+    fun deleteAlert(alertId: String) {
+        repository.deleteAlert(alertId)
+    }
+
     fun getAlertById(alertId: String): Alert? {
         return allAlerts.value?.find { it.id == alertId }
     }

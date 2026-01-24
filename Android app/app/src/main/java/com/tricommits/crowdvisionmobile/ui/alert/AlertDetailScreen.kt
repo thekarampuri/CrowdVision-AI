@@ -119,6 +119,16 @@ fun AlertDetailScreen(
                 ) {
                     Text("Mark as Completed")
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { 
+                        viewModel.deleteAlert(alert.id)
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Delete Alert")
+                }
             }
         }
     }
@@ -128,7 +138,16 @@ fun AlertDetailScreen(
 @Composable
 fun AlertDetailScreenPreview() {
     CrowdVisionMobileTheme {
-        val sampleAlert = Alert("1", "Entrance Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
+        val sampleAlert = Alert(
+            id = "1",
+            cameraName = "Main Street Cam",
+            severity = "CRITICAL",
+            timestamp = "2024-09-15 10:30:00",
+            status = "PENDING",
+            description = "High crowd density detected.",
+            latitude = 40.7128,
+            longitude = -74.0060
+        )
         AlertDetailScreen(alert = sampleAlert, viewModel = viewModel(), onBack = {}, onViewOnMap = { })
     }
 }
