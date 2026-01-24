@@ -1,32 +1,27 @@
-
 package com.tricommits.crowdvisionmobile.ui.alert
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.tricommits.crowdvisionmobile.ui.theme.*
 import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertHistoryScreen(
     viewModel: AlertViewModel,
@@ -35,38 +30,78 @@ fun AlertHistoryScreen(
 ) {
     val historyAlerts by viewModel.historyAlerts.observeAsState(emptyList())
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(text = "Alert History")
-                        Text(text = "System Logs & Completed Alerts", style = MaterialTheme.typography.bodySmall)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(BgGradientStart, BgGradientEnd)
+                )
             )
-        }
-    ) { paddingValues ->
-        if (historyAlerts.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            // Header
+            Spacer(modifier = Modifier.height(32.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("No history available")
-            }
-        } else {
-            LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                items(historyAlerts) { alert ->
-                    AlertItem(
-                        alert = alert,
-                        onClick = { onAlertClick(alert) },
-                        showMessage = true
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .background(GlassSurface, CircleShape)
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = TextWhite
                     )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "History",
+                        color = TextWhite,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Past Alerts & Logs",
+                        color = TextWhiteSecondary,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (historyAlerts.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No history available",
+                        color = TextWhiteSecondary,
+                        fontSize = 16.sp
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(historyAlerts) { alert ->
+                        AlertItem(
+                            alert = alert,
+                            onClick = { onAlertClick(alert) },
+                            showMessage = true
+                        )
+                    }
                 }
             }
         }
@@ -77,6 +112,6 @@ fun AlertHistoryScreen(
 @Composable
 fun AlertHistoryScreenPreview() {
     CrowdVisionMobileTheme {
-        AlertHistoryScreen(viewModel = viewModel(), onBack = {}, onAlertClick = {})
+        AlertHistoryScreen(viewModel = androidx.lifecycle.viewmodel.compose.viewModel<AlertViewModel>(), onBack = {}, onAlertClick = {})
     }
 }

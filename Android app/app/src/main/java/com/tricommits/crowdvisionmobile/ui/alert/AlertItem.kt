@@ -2,30 +2,30 @@
 package com.tricommits.crowdvisionmobile.ui.alert
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
+import com.tricommits.crowdvisionmobile.ui.theme.*
 
 @Composable
 fun AlertItem(
@@ -34,107 +34,120 @@ fun AlertItem(
     modifier: Modifier = Modifier,
     showMessage: Boolean = false
 ) {
-    Card(
+    // Glassmorphism Card
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f))
+            .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(GlassWhite, GlassSurface)
+                )
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(24.dp)
+            )
+            .clickable { onClick() }
+            .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Icon Container
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        color = when(alert.severity) {
+                            "CRITICAL" -> Color(0x33FF5252)
+                            "WARNING" -> Color(0x33FFD740)
+                            else -> Color(0x33448AFF)
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = getSeverityIcon(alert.severity),
+                    contentDescription = null,
+                    tint = when(alert.severity) {
+                        "CRITICAL" -> Color(0xFFFF5252)
+                        "WARNING" -> Color(0xFFFFD740)
+                        else -> Color(0xFF448AFF)
+                    },
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Text Content
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = alert.cameraName,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.Black
+                    color = TextWhite
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = alert.timestamp,
-                    fontSize = 14.sp,
-                    color = Color.Gray
+                    text = alert.timestamp.split(" ")[1], // Just show time
+                    fontSize = 12.sp,
+                    color = TextWhiteSecondary
                 )
-                if (showMessage) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = alert.description ?: "",
-                        fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (showMessage && alert.description != null) {
+                   Spacer(modifier = Modifier.height(4.dp))
+                   Text(
+                       text = alert.description,
+                       fontSize = 12.sp,
+                       color = TextWhite.copy(alpha = 0.7f),
+                       maxLines = 1,
+                       overflow = TextOverflow.Ellipsis
+                   )
                 }
             }
-            Column(horizontalAlignment = Alignment.End) {
-                RiskLevelBadge(riskLevel = alert.severity)
-                Spacer(modifier = Modifier.height(4.dp))
-                StatusBadge(status = alert.status)
+
+            // Status Badge (Simplified)
+            if (alert.status == "PENDING") {
+                Box(
+                    modifier = Modifier
+                        .background(AccentOrange.copy(alpha = 0.2f), CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "!",
+                        color = AccentOrange,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
 }
 
-@Composable
-fun RiskLevelBadge(riskLevel: String) {
-    val (backgroundColor, textColor) = when (riskLevel) {
-        "SAFE" -> Color.Green to Color.White
-        "WARNING" -> Color.Yellow to Color.Black
-        "CRITICAL" -> Color.Red to Color.White
-        else -> Color.Gray to Color.White
-    }
-
-    Badge(text = riskLevel, backgroundColor = backgroundColor, textColor = textColor)
-}
-
-@Composable
-fun StatusBadge(status: String) {
-    val (backgroundColor, textColor) = when (status) {
-        "PENDING" -> Color(0xFFFFA500) to Color.White // Orange
-        "COMPLETED" -> Color.Gray to Color.White
-        else -> Color.LightGray to Color.Black
-    }
-
-    Badge(text = status, backgroundColor = backgroundColor, textColor = textColor)
-}
-
-@Composable
-fun Badge(
-    text: String,
-    backgroundColor: Color,
-    textColor: Color
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
+fun getSeverityIcon(severity: String): ImageVector {
+    return when (severity) {
+        "CRITICAL" -> Icons.Default.Warning
+        "WARNING" -> Icons.Default.Warning
+        else -> Icons.Default.Info
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun AlertItemPreview() {
     CrowdVisionMobileTheme {
-        val sampleAlert = Alert("1", "Main Street Cam", "CRITICAL", "2024-09-15 10:30:00", "PENDING", "High crowd density detected.", 40.7128, -74.0060)
-        AlertItem(
-            alert = sampleAlert,
-            onClick = {},
-            showMessage = true
-        )
+        Box(modifier = Modifier.background(VioletDeep).padding(16.dp)) {
+            AlertItem(
+                alert = Alert("1", "Main Entrance Cam", "CRITICAL", "2024-10-10 10:00:00", "PENDING", "Overcrowding detected", 0.0, 0.0),
+                onClick = {},
+                showMessage = true
+            )
+        }
     }
 }
