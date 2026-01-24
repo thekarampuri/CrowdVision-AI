@@ -59,7 +59,7 @@ fun MapScreen(
         }
     }
 
-    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=${alert.cameraName}&risk=${alert.riskLevel}"
+    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=${alert.cameraName}&risk=${alert.severity}"
 
     Scaffold(
         topBar = {
@@ -138,7 +138,7 @@ fun MapScreen(
                         )
                         Spacer(modifier = Modifier.padding(4.dp))
                         Row {
-                            RiskLevelBadge(riskLevel = alert.riskLevel)
+                            RiskLevelBadge(riskLevel = alert.severity)
                             Spacer(modifier = Modifier.width(8.dp))
                             StatusBadge(status = alert.status)
                         }
@@ -162,10 +162,10 @@ fun MapScreenPreview() {
         val sampleAlert = Alert(
             id = "1",
             cameraName = "Main Street Cam",
-            riskLevel = "CRITICAL",
+            severity = "CRITICAL",
             timestamp = "2024-09-15 10:30:00",
             status = "PENDING",
-            message = "High crowd density detected.",
+            description = "High crowd density detected.",
             latitude = 40.7128,
             longitude = -74.0060
         )

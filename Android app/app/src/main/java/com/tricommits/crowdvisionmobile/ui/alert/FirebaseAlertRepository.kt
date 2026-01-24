@@ -35,8 +35,8 @@ class FirebaseAlertRepository {
             try {
                 val alertId = doc.id
                 val cameraName = doc.getString("cameraName")
-                val riskLevel = doc.getString("severity")
-                val message = doc.getString("description")
+                val severity = doc.getString("severity")
+                val description = doc.getString("description")
 
                 // Robustly get latitude and longitude, which might be stored as Long or Double
                 val latitude = (doc.get("latitude") as? Number)?.toDouble()
@@ -58,14 +58,14 @@ class FirebaseAlertRepository {
                     else -> statusFromFirestore // Fallback for other statuses
                 }
 
-                if (cameraName != null && riskLevel != null && timestamp != null && appStatus != null && latitude != null && longitude != null) {
+                if (cameraName != null && severity != null && timestamp != null && appStatus != null && latitude != null && longitude != null) {
                     Alert(
                         id = alertId,
                         cameraName = cameraName,
-                        riskLevel = riskLevel,
+                        severity = severity,
                         timestamp = timestamp,
                         status = appStatus,
-                        message = message,
+                        description = description,
                         latitude = latitude,
                         longitude = longitude
                     )
