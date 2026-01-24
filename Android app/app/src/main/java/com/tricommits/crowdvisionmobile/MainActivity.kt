@@ -56,12 +56,10 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
         enableEdgeToEdge()
         
-        // Start the Foreground Service to listen for alerts even when app is closed/backgrounded
-        val serviceIntent = android.content.Intent(this, CrowdAlertService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
+        // Start listening for new alerts
+        val repository = com.tricommits.crowdvisionmobile.ui.alert.FirebaseAlertRepository()
+        repository.listenForNewAlerts { alert ->
+            sendLocalNotification(alert)
         }
 
         setContent {
@@ -71,11 +69,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Keep sendLocalNotification for testing or other uses, but the Service handles it main ones now
     private fun sendLocalNotification(alert: com.tricommits.crowdvisionmobile.ui.alert.Alert) {
-     // ... existing implementation ...
-     // Optional: Remove redundant implementation if not needed here
-    }
         val channelId = "default_channel"
         val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
