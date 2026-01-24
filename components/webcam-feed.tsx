@@ -41,6 +41,9 @@ interface DetectionResult {
   gatherings?: number;
 }
 
+// Global cooldown tracker to persist across component remounts
+const alertCooldowns: Record<string, number> = {};
+
 export function WebcamFeed({
   camera,
   viewMode,
@@ -58,22 +61,23 @@ export function WebcamFeed({
   const [mlServerConnected, setMlServerConnected] = useState(true);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const isDetecting = useRef<boolean>(false);
 
-useEffect(() => {
-  // Only initialize when the camera is online and explicitly enabled
-  if (camera.status === "online" && camera.id === "CAM-001" && isWebcamEnabled) {
-    if (!streamRef.current) {
-      initializeWebcam();
+  useEffect(() => {
+    // Only initialize when the camera is online and explicitly enabled
+    if (camera.status === "online" && camera.id === "CAM-001" && isWebcamEnabled) {
+      if (!streamRef.current) {
+        initializeWebcam();
+      }
     }
-  }
 
-  // If camera goes offline or is disabled, ensure webcam is stopped
-  if (camera.status !== "online" || camera.id !== "CAM-001" || !isWebcamEnabled) {
-    if (streamRef.current) {
-      stopWebcam();
+    // If camera goes offline or is disabled, ensure webcam is stopped
+    if (camera.status !== "online" || camera.id !== "CAM-001" || !isWebcamEnabled) {
+      if (streamRef.current) {
+        stopWebcam();
+      }
     }
-  }
-}, [camera.status, isWebcamEnabled, camera.id]);
+  }, [camera.status, isWebcamEnabled, camera.id]);
 
   // Handle window visibility change to stop webcam in background
   useEffect(() => {
@@ -114,7 +118,7 @@ useEffect(() => {
   const initializeWebcam = async () => {
     try {
       console.log("[Webcam] Initializing webcam...");
-      
+
       // Check if we already have a stream to avoid double requests
       if (streamRef.current) {
         console.log("[Webcam] Stream already exists");
@@ -137,7 +141,7 @@ useEffect(() => {
 
       streamRef.current = stream;
       console.log("[Webcam] Stream obtained successfully");
-      
+
       // Set active to true to mount the video element in the DOM
       setIsWebcamActive(true);
       setError(null);
@@ -149,9 +153,9 @@ useEffect(() => {
     }
   };
 
-const stopWebcam = () => {
+  const stopWebcam = () => {
     console.log("[Webcam] Stopping webcam completely");
-    
+
     // Explicitly stop all tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => {
@@ -206,7 +210,14 @@ const stopWebcam = () => {
   const runDetection = async () => {
     if (isPaused || !isWebcamActive) return;
 
+    // Check if a detection cycle is already running
+    if (isDetecting.current) {
+      console.log("[Webcam] Skipping detection - previous cycle still running");
+      return;
+    }
+
     try {
+      isDetecting.current = true;
       const video = videoRef.current;
       const canvas = canvasRef.current;
 
@@ -232,31 +243,43 @@ const stopWebcam = () => {
       }
 
       // Only create HIGH RISK alerts when count >= 10 (matching ML server thresholds)
-      // Check for existing high risk alert within last 1 minute
+      // Check for existing high risk alert within last 30 seconds
       if (result.count >= 10) {
-        const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 1);
+        // Local throttle check (Global variable)
+        const now = Date.now();
+        const lastTime = alertCooldowns[camera.id] || 0;
 
-        if (!hasRecent) {
-          try {
-            const alertId = await AlertStorage.createHighRiskAlert({
-              title: `Crowd Alert - ${camera.name}`,
-              description: `Critical: Crowd count of ${result.count} people detected at ${camera.location}`,
-              severity: "critical",
-              location: camera.location,
-              cameraId: camera.id,
-              peopleCount: result.count,
-              timestamp: new Date(),
-              status: "active",
-              latitude: camera.latitude,
-              longitude: camera.longitude,
-              cameraName: camera.name,
-            });
+        if (now - lastTime < 30000) {
+          console.log("[ALERT] Throttled: Recent alert generated within 30s");
+        } else {
+          // Check DB for recent alerts (approx 30 seconds = 0.5 minutes)
+          const hasRecent = await AlertStorage.hasRecentAlert(camera.id, 0.5);
 
-            console.log(
-              `[ALERT] High risk alert created with ID ${alertId} for ${camera.id} with ${result.count} people`,
-            );
-          } catch (alertError) {
-            console.error("Error creating alert:", alertError);
+          if (!hasRecent) {
+            try {
+              const alertId = await AlertStorage.createHighRiskAlert({
+                title: `Crowd Alert - ${camera.name}`,
+                description: `Critical: Crowd count of ${result.count} people detected at ${camera.location}`,
+                severity: "critical",
+                location: camera.location,
+                cameraId: camera.id,
+                peopleCount: result.count,
+                timestamp: new Date(),
+                status: "active",
+                latitude: camera.latitude,
+                longitude: camera.longitude,
+                cameraName: camera.name,
+              });
+
+              console.log(
+                `[ALERT] High risk alert created with ID ${alertId} for ${camera.id} with ${result.count} people`,
+              );
+
+              // Update global throttle timestamp
+              alertCooldowns[camera.id] = Date.now();
+            } catch (alertError) {
+              console.error("Error creating alert:", alertError);
+            }
           }
         }
       }
@@ -266,6 +289,8 @@ const stopWebcam = () => {
     } catch (err: any) {
       console.error("Detection error:", err);
       setError(err.message || "Detection failed");
+    } finally {
+      isDetecting.current = false;
     }
   };
 
@@ -444,8 +469,8 @@ const stopWebcam = () => {
             </div>
             <div
               className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-red-500/20 text-red-400"
+                ? "bg-green-500/20 text-green-400"
+                : "bg-red-500/20 text-red-400"
                 }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}
@@ -476,8 +501,8 @@ const stopWebcam = () => {
             onClick={toggleWebcam}
             disabled={camera.id !== "CAM-001"}
             className={`${isWebcamEnabled && isMainCamera
-                ? "text-green-400 hover:text-green-300"
-                : "text-slate-400 hover:text-white"
+              ? "text-green-400 hover:text-green-300"
+              : "text-slate-400 hover:text-white"
               } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
             title={
               camera.id !== "CAM-001"
@@ -633,8 +658,8 @@ const stopWebcam = () => {
               onClick={toggleWebcam}
               disabled={camera.id !== "CAM-001"}
               className={`h-8 px-2 ${isWebcamEnabled && isMainCamera
-                  ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
-                  : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
+                ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
                 } ${camera.id !== "CAM-001" ? "opacity-50 cursor-not-allowed" : ""}`}
               title={
                 camera.id !== "CAM-001"
@@ -650,8 +675,8 @@ const stopWebcam = () => {
             </Button>
             <div
               className={`px-3 py-1 rounded-full text-xs font-semibold ${isWebcamActive
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-red-500/20 text-red-400"
+                ? "bg-green-500/20 text-green-400"
+                : "bg-red-500/20 text-red-400"
                 }`}
             >
               {isWebcamActive ? "LIVE" : "OFFLINE"}

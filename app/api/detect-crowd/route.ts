@@ -48,28 +48,13 @@ export async function POST(request: NextRequest) {
       );
 
       // 3. Handle Alerts
-      if (mlDetections.riskLevel === "high") {
-        try {
-          await addDoc(collection(db, "high_risk_alerts"), {
-            cameraId,
-            peopleCount: mlDetections.count, // Rename count to peopleCount
-            severity: "critical", // Map high risk to critical severity
-            status: "active",
-            timestamp: serverTimestamp(),
-            acknowledgedAt: null,
-            resolvedAt: null,
-            location: "Main Entrance", // Or "Laptop" as per user example, sticking to efficient default
-            cameraName: "Web Cam",
-            title: `High Crowd Density - Web Cam`,
-            description: `Critical: Crowd count has exceeded threshold with ${mlDetections.count} people detected`,
-            latitude: 17.66876981675993, // Hardcoded as per user example/request context
-            longitude: 75.92227938705744,
-          });
-          console.log("[API] Critical alert stored in high_risk_alerts");
-        } catch (firestoreError) {
-          console.error("[API] Firestore Error:", firestoreError);
-        }
+      // Note: Alert creation in Firestore is now handled by the frontend (webcam-feed.tsx) 
+      // to ensure proper rate limiting (30s cooldown). 
+      // The API only acts as an inference proxy.
 
+      if (mlDetections.riskLevel === "high") {
+        // Optional: Fire and forget push notification if needed, 
+        // but strictly NO database writes here to avoid duplicates.
         await sendAlertToAndroidApp({
           cameraId,
           count: mlDetections.count,
