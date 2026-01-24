@@ -55,10 +55,61 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         askNotificationPermission()
         enableEdgeToEdge()
+        
+        // Start the Foreground Service to listen for alerts even when app is closed/backgrounded
+        val serviceIntent = android.content.Intent(this, CrowdAlertService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+
         setContent {
             CrowdVisionMobileTheme {
                 CrowdVisionNavHost()
             }
+        }
+    }
+
+    // Keep sendLocalNotification for testing or other uses, but the Service handles it main ones now
+    private fun sendLocalNotification(alert: com.tricommits.crowdvisionmobile.ui.alert.Alert) {
+     // ... existing implementation ...
+     // Optional: Remove redundant implementation if not needed here
+    }
+        val channelId = "default_channel"
+        val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = android.app.NotificationChannel(
+                channelId,
+                "Crowd Alerts",
+                android.app.NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val intent = android.content.Intent(this, MainActivity::class.java).apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            this, 0, intent,
+            android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val builder = androidx.core.app.NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Ensure this resource exists, fallback if needed
+            .setContentTitle("Critical Alert: ${alert.cameraName}")
+            .setContentText("Crowd density high! ${alert.description}")
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
         }
     }
 }

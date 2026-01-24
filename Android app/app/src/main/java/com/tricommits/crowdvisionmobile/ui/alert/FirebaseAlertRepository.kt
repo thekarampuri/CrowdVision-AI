@@ -92,4 +92,54 @@ class FirebaseAlertRepository {
             .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert deleted: $alertId") }
             .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error deleting alert: $alertId", e) }
     }
+
+    fun listenForNewAlerts(onNewAlert: (Alert) -> Unit) {
+        alertsCollection.whereEqualTo("status", "active")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("FirebaseAlertRepository", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    for (dc in snapshot.documentChanges) {
+                        if (dc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                            // Check if the alert is recent (e.g., created within the last 60 seconds)
+                            // to avoid notifying for old alerts on app startup
+                            val timestampData = dc.document.get("timestamp")
+                            val timestamp = when (timestampData) {
+                                is Timestamp -> timestampData
+                                else -> null
+                            }
+
+                            if (timestamp != null) {
+                                val now = Timestamp.now()
+                                val diff = now.seconds - timestamp.seconds
+                                // Only notify if less than 60 seconds old
+                                if (diff < 60) {
+                                    val alertId = dc.document.id
+                                    val cameraName = dc.document.getString("cameraName") ?: "Camera"
+                                    val severity = dc.document.getString("severity") ?: "critical"
+                                    val description = dc.document.getString("description")
+
+                                    // Construct a minimal Alert object for notification
+                                    // Note: lat/long/etc are not needed for simple notification title/body
+                                    val alert = Alert(
+                                        id = alertId,
+                                        cameraName = cameraName,
+                                        severity = severity,
+                                        timestamp = timestamp.toDate().toString(),
+                                        status = "PENDING",
+                                        description = description,
+                                        latitude = 0.0,
+                                        longitude = 0.0
+                                    )
+                                    onNewAlert(alert)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+    }
 }

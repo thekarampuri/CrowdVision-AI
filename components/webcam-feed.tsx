@@ -277,6 +277,7 @@ export function WebcamFeed({
 
               // Update global throttle timestamp
               alertCooldowns[camera.id] = Date.now();
+
             } catch (alertError) {
               console.error("Error creating alert:", alertError);
             }
