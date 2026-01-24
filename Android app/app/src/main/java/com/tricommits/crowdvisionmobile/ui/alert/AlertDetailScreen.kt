@@ -1,25 +1,44 @@
+
 package com.tricommits.crowdvisionmobile.ui.alert
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tricommits.crowdvisionmobile.ui.theme.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,162 +49,151 @@ fun AlertDetailScreen(
     onBack: () -> Unit,
     onViewOnMap: (Alert) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(BgGradientStart, BgGradientEnd)
-                )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Alert Details") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
             )
-    ) {
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
-            Spacer(modifier = Modifier.height(32.dp))
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .background(GlassSurface, CircleShape)
-                    .size(48.dp)
+            // Alert Header Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = TextWhite
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Main Glass Card
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(GlassWhite)
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(32.dp))
-                    .padding(24.dp)
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Alert Details",
-                            color = TextWhiteSecondary,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    when(alert.severity) {
-                                        "CRITICAL" -> Color(0x33FF5252)
-                                        else -> Color(0x33448AFF)
-                                    }, RoundedCornerShape(16.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        ) {
-                            Text(
-                                text = alert.severity,
-                                color = when(alert.severity) {
-                                    "CRITICAL" -> Color(0xFFFF5252)
-                                    else -> Color(0xFF448AFF)
-                                },
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = alert.cameraName,
-                        color = TextWhite,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = TextWhiteSecondary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "${alert.latitude}, ${alert.longitude}",
-                            color = TextWhiteSecondary,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "Description",
-                        color = TextWhite,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = alert.description ?: "No description provided.",
-                        color = TextWhiteSecondary,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Button(
-                        onClick = { onViewOnMap(alert) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AccentYellow
-                        ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = Color.Black
-                        )
+                    Row {
+                        RiskLevelBadge(riskLevel = alert.severity)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "View on Map",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
+                        StatusBadge(status = alert.status)
                     }
+                }
+            }
+
+            // Alert Information Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Message: ${alert.description}", style = MaterialTheme.typography.bodyLarge)
+                    Text("Timestamp: ${alert.timestamp}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Camera ID: ${alert.id}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Location: ${alert.latitude}, ${alert.longitude}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
+            }
+
+            // Action Buttons
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { onViewOnMap(alert) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("View Location on Map")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { 
+                        viewModel.markAlertAsCompleted(alert.id)
+                        onBack() 
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = alert.status == "PENDING"
+                ) {
+                    Text("Mark as Completed")
+                }
+                 Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { 
+                        viewModel.deleteAlert(alert.id)
+                        onBack()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Delete Alert")
                 }
             }
         }
     }
 }
 
-@Preview
+@Composable
+fun RiskLevelBadge(riskLevel: String) {
+    val (backgroundColor, textColor) = when (riskLevel.lowercase()) {
+        "safe" -> Color.Green to Color.White
+        "warning" -> Color.Yellow to Color.Black
+        "critical" -> Color.Red to Color.White
+        else -> Color.Gray to Color.White
+    }
+    Badge(text = riskLevel, backgroundColor = backgroundColor, textColor = textColor)
+}
+
+@Composable
+fun StatusBadge(status: String) {
+    val (backgroundColor, textColor) = when (status) {
+        "PENDING" -> Color(0xFFFFA500) to Color.White // Orange
+        "COMPLETED" -> Color.Gray to Color.White
+        else -> Color.LightGray to Color.Black
+    }
+    Badge(text = status, backgroundColor = backgroundColor, textColor = textColor)
+}
+
+@Composable
+fun Badge(
+    text: String,
+    backgroundColor: Color,
+    textColor: Color
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(backgroundColor)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            color = textColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true)
 @Composable
 fun AlertDetailScreenPreview() {
     CrowdVisionMobileTheme {
-        AlertDetailScreen(
-            alert = Alert("1", "Test Camera", "CRITICAL", "10:00 AM", "PENDING", "High density", 0.0, 0.0),
-            viewModel = androidx.lifecycle.viewmodel.compose.viewModel<AlertViewModel>(),
-            onBack = {},
-            onViewOnMap = {}
+        val sampleAlert = Alert(
+            id = "1",
+            cameraName = "Main Street Cam",
+            severity = "CRITICAL",
+            timestamp = "2024-09-15 10:30:00",
+            status = "PENDING",
+            description = "High crowd density detected.",
+            latitude = 40.7128,
+            longitude = -74.0060
         )
+        AlertDetailScreen(alert = sampleAlert, viewModel = viewModel(), onBack = {}, onViewOnMap = { })
     }
 }
