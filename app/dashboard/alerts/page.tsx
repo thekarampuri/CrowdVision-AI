@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { AlertCard } from "@/components/alert-card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle, Clock, Filter } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Filter, Download, FileText } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { AlertStorage, type Alert } from "@/lib/alert-storage";
 
 export default function AlertsPage() {
@@ -78,6 +80,71 @@ export default function AlertsPage() {
     (a) => a.severity === "critical" && a.status === "active",
   ).length;
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(20);
+    doc.text("CrowdVision AI - Alert Report", 14, 22);
+
+    doc.setFontSize(11);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+    doc.text(`Filters: Status=${filterStatus}, Severity=${filterSeverity}`, 14, 36);
+
+    // Table Data
+    const tableData = filteredAlerts.map(alert => [
+      new Date(alert.timestamp).toLocaleString(),
+      alert.cameraName,
+      alert.severity.toUpperCase(),
+      alert.status.toUpperCase(),
+      alert.description,
+      `${alert.latitude.toFixed(4)}, ${alert.longitude.toFixed(4)}`
+    ]);
+
+    autoTable(doc, {
+      startY: 44,
+      head: [['Timestamp', 'Camera', 'Severity', 'Status', 'Description', 'Location']],
+      body: tableData,
+      headStyles: { fillColor: [59, 130, 246] }, // Blue
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        4: { cellWidth: 50 } // Description column width
+      }
+    });
+
+    doc.save(`crowdvision-alerts-${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['ID', 'Timestamp', 'Camera Name', 'Severity', 'Status', 'Description', 'Latitude', 'Longitude'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredAlerts.map(alert => [
+        alert.id,
+        `"${new Date(alert.timestamp).toLocaleString()}"`,
+        `"${alert.cameraName}"`,
+        alert.severity,
+        alert.status,
+        `"${alert.description.replace(/"/g, '""')}"`, // Escape quotes
+        alert.latitude,
+        alert.longitude
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `crowdvision-alerts-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -107,6 +174,27 @@ export default function AlertsPage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Export Actions */}
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="glass border-white/20 text-white hover:bg-white/10 gap-2"
+            onClick={handleExportCSV}
+            disabled={filteredAlerts.length === 0}
+          >
+            <FileText className="w-4 h-4" />
+            Export CSV
+          </Button>
+          <Button
+            className="bg-blue-600 hover:bg-blue-500 text-white gap-2"
+            onClick={handleExportPDF}
+            disabled={filteredAlerts.length === 0}
+          >
+            <Download className="w-4 h-4" />
+            Export PDF
+          </Button>
         </div>
 
         {/* Stats */}
