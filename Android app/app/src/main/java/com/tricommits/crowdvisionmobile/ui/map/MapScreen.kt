@@ -3,6 +3,7 @@ package com.tricommits.crowdvisionmobile.ui.map
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,12 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
 import com.tricommits.crowdvisionmobile.ui.alert.Alert
-import com.tricommits.crowdvisionmobile.ui.theme.*
+import com.tricommits.crowdvisionmobile.ui.alert.RiskLevelBadge
+import com.tricommits.crowdvisionmobile.ui.alert.StatusBadge
+import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
@@ -55,13 +54,15 @@ fun MapScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=${alert.cameraName}&risk=${alert.severity}"
+
     val webView = remember {
         WebView(context).apply {
             settings.javaScriptEnabled = true
+            webViewClient = WebViewClient() // Add a WebViewClient
+            loadUrl(url)
         }
     }
-
-    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=${alert.cameraName}&risk=${alert.severity}"
 
     Scaffold(
         topBar = {
@@ -89,9 +90,7 @@ fun MapScreen(
             AndroidView(
                 factory = { webView },
                 modifier = Modifier.fillMaxSize()
-            ) { view ->
-                view.loadUrl(url)
-            }
+            )
 
             // Floating UI elements
             Column(
@@ -105,8 +104,6 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = { webView.evaluateJavascript("zoomIn()", null) },
                         shape = CircleShape,
-                        containerColor = VioletPrimary,
-                        contentColor = Color.White,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Default.Add, contentDescription = "Zoom In")
@@ -115,8 +112,6 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = { webView.evaluateJavascript("zoomOut()", null) },
                         shape = CircleShape,
-                        containerColor = VioletPrimary,
-                        contentColor = Color.White,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
@@ -125,77 +120,34 @@ fun MapScreen(
                     FloatingActionButton(
                         onClick = { webView.evaluateJavascript("centerMap(${alert.latitude}, ${alert.longitude})", null) },
                         shape = CircleShape,
-                        containerColor = AccentYellow,
-                        contentColor = Color.Black,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Default.MyLocation, contentDescription = "Center Map")
                     }
                 }
 
-                // Info Card at the bottom (Glassmorphism)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(GlassWhite.copy(alpha=0.9f)) // Slightly more opaque for readability over map
-                        .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                        .padding(16.dp)
+                // Info Card at the bottom
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                 ) {
-                    Column {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = alert.cameraName,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = VioletDeep
+                            fontSize = 20.sp
                         )
                         Spacer(modifier = Modifier.padding(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Inline Risk Badge
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        when(alert.severity) {
-                                            "CRITICAL" -> Color(0xFFFF5252)
-                                            "WARNING" -> Color(0xFFFFD740)
-                                            else -> Color(0xFF448AFF)
-                                        }, RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = alert.severity,
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        Row {
+                            RiskLevelBadge(riskLevel = alert.severity)
                             Spacer(modifier = Modifier.width(8.dp))
-                            // Inline Status Badge
-                             Box(
-                                modifier = Modifier
-                                    .background(
-                                        when(alert.status) {
-                                            "PENDING" -> AccentOrange
-                                            "COMPLETED" -> Color.Gray
-                                            else -> Color.LightGray
-                                        }, RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = alert.status,
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            StatusBadge(status = alert.status)
                         }
                         Spacer(modifier = Modifier.padding(4.dp))
                         Text(
                             text = "${alert.latitude}, ${alert.longitude}",
                             fontSize = 12.sp,
-                            color = VioletDeep.copy(alpha=0.7f)
+                            color = Color.Gray
                         )
                     }
                 }

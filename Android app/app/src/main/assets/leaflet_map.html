@@ -1,27 +1,55 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Leaflet Map</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="leaflet.css" />
+    <script src="leaflet.js"></script>
     <style>
-        body { padding: 0; margin: 0; }
-        html, body, #map { height: 100%; width: 100%; }
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html,
+        body,
+        #map {
+            height: 100%;
+            width: 100%;
+        }
     </style>
 </head>
+
 <body>
     <div id="map"></div>
     <script>
-        var map = L.map('map');
+        var map = L.map('map').setView([0, 0], 2); // Default view
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
+        var currentMarker = null;
+
+        function initMap(lat, lng, name, risk, zoom) {
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+
+            var targetZoom = zoom || 15;
+            map.setView([lat, lng], targetZoom);
+
+            currentMarker = L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<b>${name}</b><br>Risk: ${risk}`)
+                .openPopup();
+        }
+
         function centerMap(lat, lng) {
             map.setView([lat, lng], 15);
-            L.marker([lat, lng]).addTo(map);
+            if (currentMarker) {
+                currentMarker.openPopup();
+            }
         }
 
         function zoomIn() {
@@ -31,21 +59,7 @@
         function zoomOut() {
             map.zoomOut();
         }
-
-        // Get parameters from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const lat = urlParams.get('lat');
-        const lng = urlParams.get('lng');
-        const name = urlParams.get('name');
-        const risk = urlParams.get('risk');
-        const zoom = urlParams.get('zoom') || 15;
-
-        if (lat && lng) {
-            map.setView([lat, lng], zoom);
-            L.marker([lat, lng]).addTo(map)
-                .bindPopup(`<b>${name}</b><br>Risk: ${risk}`)
-                .openPopup();
-        }
     </script>
 </body>
+
 </html>
