@@ -196,6 +196,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Contact
 
-**CrowdVision AI Team** available at [support@crowdvision.ai](mailto:support@crowdvision.ai)
+**CrowdVision AI Team** available at [akhilkarampuri25@gmail.com](mailto:akhilkarampuri25@gmail.com)
 
 > **"Empowering Safer Cities through Intelligent Vision"**
