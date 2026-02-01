@@ -1,20 +1,18 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Explicitly allow the original alerts collection
+    // Explicitly allow the original alerts collection (Deprecated)
     match /alerts/{alertId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
     
     // Explicitly allow the new high_risk_alerts collection (REQUIRED for Dashboard)
     match /high_risk_alerts/{alertId} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
 
-    // Keep the catch-all for development convenience if desired, 
-    // or rely on the specific rules above. 
-    // Commenting out strict catch-all to ensure we don't accidentally expose everything in prod if not intended.
-    // match /{document=**} {
-    //   allow read, write: if true;
-    // }
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

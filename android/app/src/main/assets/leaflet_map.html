@@ -59,6 +59,20 @@
         function zoomOut() {
             map.zoomOut();
         }
+
+        // Parse URL parameters and initialize map
+        window.onload = function() {
+            var params = new URLSearchParams(window.location.search);
+            var lat = parseFloat(params.get('lat'));
+            var lng = parseFloat(params.get('lng'));
+            var name = params.get('name');
+            var risk = params.get('risk');
+            var zoom = parseInt(params.get('zoom')) || 15;
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                initMap(lat, lng, name || "Camera Location", risk || "Unknown", zoom);
+            }
+        };
     </script>
 </body>
 
