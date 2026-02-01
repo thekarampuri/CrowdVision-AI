@@ -31,6 +31,7 @@
 ## 🌟 Key Features
 
 ### 🖥️ Web Command Dashboard
+![Web Dashboard Preview](assets/web_dashboard_preview.png)
 -   **Live Surveillance**: Real-time video feeds with bounding box augmentation for detected individuals.
 -   **Leaflet Heatmap Integration**: Interactive geospatial map showing real-time crowd density using dynamic markers and coverage circles.
 -   **Intelligent Alerting**: Automatic incident generation based on crowd density thresholds.
@@ -39,6 +40,7 @@
 -   **Role-Based Access**: Secure authentication via Firebase (Email/Password & Google OAuth).
 
 ### 📱 Field Officer Mobile App
+![Android App Preview](assets/android_app_preview.png)
 -   **Instant Notifications**: Push notifications for high-risk alerts assigned to specific zones.
 -   **Incident Management**: View, acknowledge, and resolve alerts directly from the field.
 -   **Location Services**: Integration with device GPS to show nearby alerts.
