@@ -6,6 +6,8 @@ Flask-based machine learning inference server for real-time crowd detection usin
 
 This server provides REST API endpoints for crowd detection and person counting using the YOLOv8 model. It processes images from camera feeds, detects people, calculates crowd density, and returns risk assessments.
 
+![Crowd Detection Example](../assets/dashboard_live.png)
+
 ## 🏗️ Architecture
 
 ```
@@ -31,7 +33,7 @@ pip install -r requirements.txt
 
 ### 2. Verify Model File
 
-Ensure `yolov8n.pt` is in the `models/` directory:
+Ensure `yolov8m.pt` is in the `models/` directory:
 
 ```bash
 ls models/yolov8n.pt
@@ -278,12 +280,12 @@ const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
 
 ## 📊 Model Information
 
-**Model:** YOLOv8n (Nano)
+**Model:** YOLOv8m (Medium)
 - **Architecture:** YOLOv8
-- **Size:** ~6 MB
-- **Parameters:** 3.2M
-- **Speed:** 30+ FPS on CPU, 100+ FPS on GPU
-- **mAP50:** 37.3%
+- **Size:** ~50 MB
+- **Parameters:** 25.9M
+- **Speed:** ~200ms on CPU
+- **mAP50:** 50.2% (Significantly higher than Nano)
 - **Input Size:** 640x640
 - **Classes:** 80 COCO classes (filtered to 'person' only)
 
