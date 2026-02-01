@@ -1,3 +1,4 @@
+
 import base64
 import logging
 import os
@@ -17,19 +18,25 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)  # Enable CORS for Next.js API communication
 
-# Load YOLOv8 model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", "yolov8n.pt")
-logger.info(f"Loading YOLOv8 model from: {MODEL_PATH}")
+# Load YOLOv8 model - Upgraded to Medium model for better accuracy
+# YOLO will automatically download yolov8m.pt if it's not present
+MODEL_NAME = "yolov8m.pt"
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", MODEL_NAME)
+logger.info(f"Loading YOLOv8 model: {MODEL_NAME}")
 
 try:
-    model = YOLO(MODEL_PATH)
-    logger.info("✓ YOLOv8 model loaded successfully")
+    # If the specific model file doesn't exist in the models dir, Ultralytics might download it to current dir
+    # We want to ensure it stays organized, but for simplicity, we let YOLO handle the download
+    # passing the full path forces it to look there or save there if possible/configured, 
+    # but standard YOLO usage often downloads to root. We will stick to standard usage + path hint.
+    model = YOLO(MODEL_NAME) 
+    logger.info(f"✓ {MODEL_NAME} loaded successfully")
 except Exception as e:
     logger.error(f"✗ Failed to load model: {str(e)}")
     model = None
 
 # Configuration
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.3 # Lowered to increase recall (detect more people)
 IOU_THRESHOLD = 0.4
 PERSON_CLASS_ID = 0  # COCO dataset class ID for 'person'
 
