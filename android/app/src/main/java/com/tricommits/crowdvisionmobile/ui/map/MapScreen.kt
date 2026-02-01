@@ -54,13 +54,52 @@ fun MapScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=${alert.cameraName}&risk=${alert.severity}"
+    
+    // Encode parameters to handle spaces and special characters safely
+    val encodedName = java.net.URLEncoder.encode(alert.cameraName, "UTF-8").replace("+", "%20")
+    val encodedRisk = java.net.URLEncoder.encode(alert.severity, "UTF-8").replace("+", "%20")
+    
+    val url = "file:///android_asset/leaflet_map.html?lat=${alert.latitude}&lng=${alert.longitude}&zoom=15&name=$encodedName&risk=$encodedRisk"
 
     val webView = remember {
         WebView(context).apply {
             settings.javaScriptEnabled = true
-            webViewClient = WebViewClient() // Add a WebViewClient
+            settings.domStorageEnabled = true
+            settings.allowFileAccess = true
+            // Critical for loading local css/js files referenced in the HTML
+            settings.allowFileAccessFromFileURLs = true
+            settings.allowUniversalAccessFromFileURLs = true
+            
+            // Fix: Set layout params to ensure WebView takes up space
+            layoutParams = android.view.ViewGroup.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            )
+
+            // Fix: Set a standard User-Agent to avoid being blocked by OSM tile servers
+            settings.userAgentString = "Mozilla/5.0 (Linux; Android 10; Mobile; rv:88.0) Gecko/88.0 Firefox/88.0"
+
+            // Enable detailed console logging
+            webChromeClient = object : android.webkit.WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage): Boolean {
+                    android.util.Log.d("WebViewConsole", "${consoleMessage.message()} -- From line ${consoleMessage.lineNumber()} of ${consoleMessage.sourceId()}")
+                    return true
+                }
+            }
+            
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    android.util.Log.d("WebViewStatus", "Page loaded: $url")
+                }
+                
+                override fun onReceivedError(view: WebView?, request: android.webkit.WebResourceRequest?, error: android.webkit.WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    android.util.Log.e("WebViewError", "Error loading ${request?.url}: ${error?.description}")
+                }
+            }
             loadUrl(url)
+            // loadUrl("file:///android_asset/debug.html") // Uncomment to test basic WebView functionality
         }
     }
 
