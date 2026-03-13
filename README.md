@@ -85,23 +85,23 @@ The system operates on a strictly defined logic to ensure consistency across the
 ## 🏗️ Technology Stack
 
 ### Frontend (Web Dashboard)
--   **Framework**: Next.js 16 (App Router)
--   **Language**: TypeScript, React 19
+-   **Framework**: Next.js 16.0.10 (App Router)
+-   **Language**: TypeScript, React 19.2.0
 -   **Styling**: Tailwind CSS, Shadcn UI
 -   **Maps**: Leaflet, React-Leaflet
--   **State/Data**: React Hooks, Recharts
+-   **State/Data**: React Hooks, Recharts, Zod
 
 ### Backend (Inference Engine)
 -   **Runtime**: Python 3.8+
--   **Framework**: Flask (API)
--   **AI Model**: YOLOv8n (Ultralytics)
--   **Processing**: OpenCV, NumPy
+-   **Framework**: Flask 3.0.0 (API)
+-   **AI Model**: YOLOv8n (Ultralytics 8.3.0)
+-   **Processing**: OpenCV 4.10, NumPy
 
 ### Mobile (Field App)
 -   **Platform**: Android
 -   **Language**: Kotlin
--   **Architecture**: MVVM
--   **Database**: Room (Local Persistence)
+-   **Architecture**: MVVM, Jetpack Compose
+-   **Database**: Firebase Firestore (Online), Room (Local Persistence - *Planned*)
 
 ### Infrastructure
 -   **Auth & Database**: Firebase Authentication, Firestore

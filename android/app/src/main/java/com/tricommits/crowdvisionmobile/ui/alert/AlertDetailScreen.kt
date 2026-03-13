@@ -41,6 +41,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
 import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertDetailScreen(
@@ -49,6 +55,19 @@ fun AlertDetailScreen(
     onBack: () -> Unit,
     onViewOnMap: (Alert) -> Unit
 ) {
+    var metricsData by remember { mutableStateOf<Map<String, Any>>(emptyMap()) }
+
+    LaunchedEffect(alert.id) {
+        viewModel.getAlertMetrics(alert.id) { updatedMetrics ->
+            metricsData = updatedMetrics
+        }
+    }
+
+    val createdAt = metricsData["createdAt"] as? Long
+    val assignedAt = metricsData["assignedAt"] as? Long
+    val reachedAt = metricsData["reachedAt"] as? Long
+    val assignedRescuer = metricsData["assignedRescuer"] as? String
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,6 +109,27 @@ fun AlertDetailScreen(
                 }
             }
 
+            // [NEW] SOS Performance Metrics Card
+            if (alert.status == "PENDING") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)) // Dark theme for metrics
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Live SOS Tracking", color = Color.White, fontWeight = FontWeight.Bold)
+                        
+                        MetricRow("Created", createdAt?.let { formatTime(it) } ?: "Pending...")
+                        MetricRow("Assigned", assignedAt?.let { formatTime(it) } ?: "Waiting for Dispatch")
+                        MetricRow("Reached", reachedAt?.let { formatTime(it) } ?: "In Transit...")
+                        
+                        if (assignedRescuer != null) {
+                            Text("Rescuer: $assignedRescuer", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                        }
+                    }
+                }
+            }
+
             // Alert Information Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -112,30 +152,66 @@ fun AlertDetailScreen(
                 ) {
                     Text("View Location on Map")
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { 
-                        viewModel.markAlertAsCompleted(alert.id)
-                        onBack() 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = alert.status == "PENDING"
-                ) {
-                    Text("Mark as Completed")
+                
+                if (alert.status == "PENDING") {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    if (assignedAt == null) {
+                        Button(
+                            onClick = { viewModel.assignRescuer(alert.id, "Rescue Team Alpha") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6))
+                        ) {
+                            Text("Assign Rescue Team")
+                        }
+                    } else if (reachedAt == null) {
+                        Button(
+                            onClick = { viewModel.markAsReached(alert.id) },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                        ) {
+                            Text("Mark as Reached")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { 
+                                viewModel.markAlertAsCompleted(alert.id)
+                                onBack() 
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Finalize & Resolve SOS")
+                        }
+                    }
                 }
-                 Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = { 
                         viewModel.deleteAlert(alert.id)
                         onBack()
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("Delete Alert")
                 }
             }
         }
     }
+}
+
+@Composable
+fun MetricRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = Color.Gray, fontSize = 12.sp)
+        Text(value, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+    }
+}
+
+private fun formatTime(millis: Long): String {
+    val sdf = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date(millis))
 }
 
 @Composable

@@ -131,15 +131,32 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Floating UI elements
+            // Stats Card in the top left corner (Floating overlay)
+            val stats by viewModel.globalStats.observeAsState(SOSMetrics())
+            
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(16.dp)
+                    .width(180.dp)
+                    .align(Alignment.TopStart)
             ) {
-                // FABs in the top right corner
-                Column(modifier = Modifier.align(Alignment.End)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xCC000000)), // Semi-transparent black
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Performance Metrics", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Divider(color = Color.White.copy(alpha = 0.1f))
+                        
+                        AverageMetricItem("Avg. Assign", formatDuration(stats.avgTimeToAssign))
+                        AverageMetricItem("Avg. Reach", formatDuration(stats.avgTimeToReach))
+                        AverageMetricItem("Avg. Resolve", formatDuration(stats.avgTotalResolveTime))
+                    }
+                }
+            }
+
+            // Floating UI elements (FABs)
                     FloatingActionButton(
                         onClick = { webView.evaluateJavascript("zoomIn()", null) },
                         shape = CircleShape,

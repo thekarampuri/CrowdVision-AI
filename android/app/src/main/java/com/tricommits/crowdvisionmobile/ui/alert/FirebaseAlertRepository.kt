@@ -6,25 +6,27 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import com.tricommits.crowdvisionmobile.data.MetricsRepository
 
 class FirebaseAlertRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val alertsCollection = firestore.collection("high_risk_alerts")
+    private val metricsRepository = MetricsRepository()
 
     fun getAlerts(): LiveData<List<Alert>> {
-        val alerts = MutableLiveData<List<Alert>>(emptyList()) // Initialize with empty list
+        val alerts = MutableLiveData<List<Alert>>(emptyList())
         alertsCollection.addSnapshotListener { snapshot, e ->
             if (e != null) {
                 Log.w("FirebaseAlertRepository", "Listen failed.", e)
-                alerts.value = emptyList() // Post empty list on error
+                alerts.value = emptyList()
                 return@addSnapshotListener
             }
 
             if (snapshot != null && !snapshot.isEmpty) {
                 alerts.value = snapshot.toAlerts()
             } else {
-                alerts.value = emptyList() // Post empty list for empty snapshot
+                alerts.value = emptyList()
             }
         }
         return alerts
@@ -37,12 +39,9 @@ class FirebaseAlertRepository {
                 val cameraName = doc.getString("cameraName")
                 val severity = doc.getString("severity")
                 val description = doc.getString("description")
-
-                // Robustly get latitude and longitude, which might be stored as Long or Double
                 val latitude = (doc.get("latitude") as? Number)?.toDouble()
                 val longitude = (doc.get("longitude") as? Number)?.toDouble()
 
-                // Robust timestamp handling
                 val timestampData = doc.get("timestamp")
                 val timestamp: String? = when (timestampData) {
                     is Timestamp -> timestampData.toDate().toString()
@@ -55,7 +54,7 @@ class FirebaseAlertRepository {
                 val appStatus = when (statusFromFirestore) {
                     "active" -> "PENDING"
                     "resolved" -> "COMPLETED"
-                    else -> statusFromFirestore // Fallback for other statuses
+                    else -> statusFromFirestore
                 }
 
                 if (cameraName != null && severity != null && timestamp != null && appStatus != null && latitude != null && longitude != null) {
@@ -70,11 +69,9 @@ class FirebaseAlertRepository {
                         longitude = longitude
                     )
                 } else {
-                    Log.w("FirebaseAlertRepository", "Skipping document ${doc.id} due to missing or invalid fields.")
                     null
                 }
             } catch (e: Exception) {
-                Log.e("FirebaseAlertRepository", "Error converting document ${doc.id} to Alert", e)
                 null
             }
         }
@@ -84,58 +81,45 @@ class FirebaseAlertRepository {
         val firestoreStatus = if (status == "COMPLETED") "resolved" else status
         alertsCollection.document(alertId).update("status", firestoreStatus)
             .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert status updated for $alertId") }
-            .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error updating alert status for $alertId", e) }
     }
 
     fun deleteAlert(alertId: String) {
         alertsCollection.document(alertId).delete()
-            .addOnSuccessListener { Log.d("FirebaseAlertRepository", "Alert deleted: $alertId") }
-            .addOnFailureListener { e -> Log.w("FirebaseAlertRepository", "Error deleting alert: $alertId", e) }
     }
 
     fun listenForNewAlerts(onNewAlert: (Alert) -> Unit) {
         alertsCollection.whereEqualTo("status", "active")
             .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    Log.w("FirebaseAlertRepository", "Listen failed.", e)
-                    return@addSnapshotListener
-                }
+                if (e != null || snapshot == null) return@addSnapshotListener
 
-                if (snapshot != null) {
-                    for (dc in snapshot.documentChanges) {
-                        if (dc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
-                            // Check if the alert is recent (e.g., created within the last 60 seconds)
-                            // to avoid notifying for old alerts on app startup
-                            val timestampData = dc.document.get("timestamp")
-                            val timestamp = when (timestampData) {
-                                is Timestamp -> timestampData
-                                else -> null
-                            }
+                for (dc in snapshot.documentChanges) {
+                    if (dc.type == com.google.firebase.firestore.DocumentChange.Type.ADDED) {
+                        val alertId = dc.document.id
+                        
+                        // [NEW] Trigger RTDB metric tracking for NEW alerts
+                        metricsRepository.recordCreation(alertId)
 
-                            if (timestamp != null) {
-                                val now = Timestamp.now()
-                                val diff = now.seconds - timestamp.seconds
-                                // Only notify if less than 60 seconds old
-                                if (diff < 60) {
-                                    val alertId = dc.document.id
-                                    val cameraName = dc.document.getString("cameraName") ?: "Camera"
-                                    val severity = dc.document.getString("severity") ?: "critical"
-                                    val description = dc.document.getString("description")
+                        val timestampData = dc.document.get("timestamp")
+                        val timestamp = when (timestampData) {
+                            is Timestamp -> timestampData
+                            else -> null
+                        }
 
-                                    // Construct a minimal Alert object for notification
-                                    // Note: lat/long/etc are not needed for simple notification title/body
-                                    val alert = Alert(
-                                        id = alertId,
-                                        cameraName = cameraName,
-                                        severity = severity,
-                                        timestamp = timestamp.toDate().toString(),
-                                        status = "PENDING",
-                                        description = description,
-                                        latitude = 0.0,
-                                        longitude = 0.0
-                                    )
-                                    onNewAlert(alert)
-                                }
+                        if (timestamp != null) {
+                            val now = Timestamp.now()
+                            val diff = now.seconds - timestamp.seconds
+                            if (diff < 60) {
+                                val alert = Alert(
+                                    id = alertId,
+                                    cameraName = dc.document.getString("cameraName") ?: "Camera",
+                                    severity = dc.document.getString("severity") ?: "critical",
+                                    timestamp = timestamp.toDate().toString(),
+                                    status = "PENDING",
+                                    description = dc.document.getString("description"),
+                                    latitude = (dc.document.get("latitude") as? Number)?.toDouble() ?: 0.0,
+                                    longitude = (dc.document.get("longitude") as? Number)?.toDouble() ?: 0.0
+                                )
+                                onNewAlert(alert)
                             }
                         }
                     }

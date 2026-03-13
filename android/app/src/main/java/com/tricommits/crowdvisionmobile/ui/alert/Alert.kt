@@ -17,7 +17,11 @@ data class Alert(
     val location: String? = null,
     val peopleCount: Int? = null,
     val resolvedAt: String? = null,
-    val title: String? = null
+    val title: String? = null,
+    val createdAt: Long? = null,
+    val assignedAt: Long? = null,
+    val reachedAt: Long? = null,
+    val assignedRescuer: String? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString()!!,
@@ -33,6 +37,10 @@ data class Alert(
         parcel.readString(),
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readString(),
+        parcel.readString(),
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readValue(Long::class.java.classLoader) as? Long,
         parcel.readString()
     )
 
@@ -51,6 +59,10 @@ data class Alert(
         parcel.writeValue(peopleCount)
         parcel.writeString(resolvedAt)
         parcel.writeString(title)
+        parcel.writeValue(createdAt)
+        parcel.writeValue(assignedAt)
+        parcel.writeValue(reachedAt)
+        parcel.writeString(assignedRescuer)
     }
 
     override fun describeContents(): Int {
