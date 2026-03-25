@@ -1,6 +1,6 @@
-# CrowdVision AI - Complete Setup Guide
+# AI Based Crowd Watcher for Public Safety - Complete Setup Guide
 
-This guide will walk you through setting up the complete CrowdVision AI system from scratch.
+This guide will walk you through setting up the complete AI Based Crowd Watcher for Public Safety system from scratch.
 
 ## 📋 Table of Contents
 
@@ -41,7 +41,7 @@ This guide will walk you through setting up the complete CrowdVision AI system f
 
 ```bash
 # Navigate to project directory
-cd E:\Projects\CrowdVision-AI
+cd E:\Projects\AI Based Crowd Watcher for Public Safety
 
 # Install frontend dependencies
 npm install
@@ -71,7 +71,7 @@ chmod +x start_server.sh
 
 Open a new terminal:
 ```bash
-cd E:\Projects\CrowdVision-AI
+cd E:\Projects\AI Based Crowd Watcher for Public Safety
 npm run dev
 ```
 
@@ -89,7 +89,7 @@ npm run dev
 #### 1.1 Install Node.js Dependencies
 
 ```bash
-cd E:\Projects\CrowdVision-AI
+cd E:\Projects\AI Based Crowd Watcher for Public Safety
 
 # Using npm
 npm install
@@ -101,7 +101,7 @@ pnpm install
 #### 1.2 Configure Firebase (Already Done)
 
 The Firebase configuration is already set up in `lib/firebase.ts`:
-- Project ID: `crowdvision-ai-7e13f`
+- Project ID: `AI Based Crowd Watcher for Public Safety-7e13f`
 - Authentication enabled
 - Firestore database configured
 
@@ -178,9 +178,9 @@ python app.py
 You should see:
 ```
 ============================================================
-CrowdVision AI - ML Inference Server
+AI Based Crowd Watcher for Public Safety - ML Inference Server
 ============================================================
-Model: E:\Projects\CrowdVision-AI\ml-server\models\yolov8n.pt
+Model: E:\Projects\AI Based Crowd Watcher for Public Safety\ml-server\models\yolov8n.pt
 Confidence Threshold: 0.5
 IOU Threshold: 0.4
 Risk Thresholds: {'low': (0, 10), 'medium': (11, 25), 'high': (26, 999)}
@@ -198,7 +198,7 @@ python test_server.py
 Expected output:
 ```
 ╔==========================================================╗
-║          CrowdVision AI - ML Server Tests                ║
+║          AI Based Crowd Watcher for Public Safety - ML Server Tests                ║
 ╚==========================================================╝
 
 ============================================================
@@ -435,7 +435,7 @@ ssh -i your-key.pem ubuntu@your-ec2-ip
 
 # Clone repository
 git clone <your-repo-url>
-cd CrowdVision-AI/ml-server
+cd AI Based Crowd Watcher for Public Safety/ml-server
 
 # Install dependencies
 sudo apt update

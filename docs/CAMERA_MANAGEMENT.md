@@ -2,7 +2,7 @@
 
 ## Overview
 
-The CrowdVision AI system now features a complete camera management solution with interactive Leaflet map integration. This allows you to add, manage, and visualize camera locations directly on a real-world map.
+The AI Based Crowd Watcher for Public Safety system now features a complete camera management solution with interactive Leaflet map integration. This allows you to add, manage, and visualize camera locations directly on a real-world map.
 
 ---
 

@@ -1,7 +1,7 @@
 @echo off
 cls
 echo ========================================
-echo   CrowdVision AI - Starting Application
+echo   AI Based Crowd Watcher for Public Safety - Starting Application
 echo ========================================
 echo.
 

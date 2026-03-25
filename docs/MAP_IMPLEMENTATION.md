@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Leaflet map implementation in CrowdVision-AI for visualizing camera locations and crowd density in real-time.
+This document describes the Leaflet map implementation in AI Based Crowd Watcher for Public Safety for visualizing camera locations and crowd density in real-time.
 
 ## Installation
 
@@ -231,7 +231,7 @@ export async function GET() {
 
 ## Styling
 
-The map components use the existing CrowdVision-AI theme:
+The map components use the existing AI Based Crowd Watcher for Public Safety theme:
 - Glass morphism cards
 - Dark/light mode support
 - Consistent color scheme

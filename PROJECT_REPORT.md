@@ -1,7 +1,7 @@
-# 📄 CrowdVision AI - Detailed Project Report
+# 📄 AI Based Crowd Watcher for Public Safety - Detailed Project Report
 
 ## 1. 📖 Executive Overview
-**CrowdVision AI** is a state-of-the-art surveillance ecosystem designed to enhance public safety through real-time crowd monitoring and intelligent alerting. By leveraging Computer Vision (AI) and Geospatial Mapping, the system transforms traditional passive CCTV feeds into active, data-driven security insights. It provides a comprehensive solution for monitoring crowd density, detecting high-risk gatherings, and coordinating field response via a dedicated mobile application.
+**AI Based Crowd Watcher for Public Safety** is a state-of-the-art surveillance ecosystem designed to enhance public safety through real-time crowd monitoring and intelligent alerting. By leveraging Computer Vision (AI) and Geospatial Mapping, the system transforms traditional passive CCTV feeds into active, data-driven security insights. It provides a comprehensive solution for monitoring crowd density, detecting high-risk gatherings, and coordinating field response via a dedicated mobile application.
 
 ---
 
@@ -13,7 +13,7 @@ Traditional surveillance systems suffer from significant limitations:
 *   **Disconnect**: Field officers lack real-time context and rely on radio communications that can be slow or unclear.
 
 ## 3. 💡 Solution
-CrowdVision AI addresses these challenges with an automated, integrated ecosystem:
+AI Based Crowd Watcher for Public Safety addresses these challenges with an automated, integrated ecosystem:
 1.  **Automated Detection**: AI models continually scan feeds to count people and assess risk.
 2.  **Real-Time Visualization**: A central dashboard visualizes data on interactive maps (heatmaps) and charts.
 3.  **Instant Alerts**: Threshold-based logic triggers instant alerts when crowd density becomes critical.
@@ -197,7 +197,7 @@ npm run dev
 ### Step 1: Clone Repository
 ```bash
 git clone https://github.com/your-repo/crowdvision-ai.git
-cd crowdvision-ai
+cd AI Based Crowd Watcher for Public Safety
 ```
 
 ### Step 2: Configure Environment
@@ -216,7 +216,7 @@ For the web and server, simply run `start.bat` once, or install manually as show
 1.  Go to Firebase Console > Project Settings > General.
 2.  Add an Android App (package: `com.tricommits.crowdvisionmobile`).
 3.  Download `google-services.json`.
-4.  Place it in `crowdvision-ai/android/app/`.
+4.  Place it in `AI Based Crowd Watcher for Public Safety/android/app/`.
 5.  Sync Gradle in Android Studio.
 
 ---

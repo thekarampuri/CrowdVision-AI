@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo CrowdVision AI - ML Inference Server
+echo AI Based Crowd Watcher for Public Safety - ML Inference Server
 echo ========================================
 echo.
 

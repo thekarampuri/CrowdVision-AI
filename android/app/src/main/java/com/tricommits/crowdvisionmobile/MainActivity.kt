@@ -70,15 +70,23 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun sendLocalNotification(alert: com.tricommits.crowdvisionmobile.ui.alert.Alert) {
-        val channelId = "default_channel"
+        val channelId = "crowd_alerts_critical"
         val notificationManager = getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = android.app.NotificationChannel(
                 channelId,
-                "Crowd Alerts",
+                "Critical Crowd Alerts",
                 android.app.NotificationManager.IMPORTANCE_HIGH
             )
+            
+            val alarmSound = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+            val audioAttributes = android.media.AudioAttributes.Builder()
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                .build()
+            channel.setSound(alarmSound, audioAttributes)
+            
             notificationManager.createNotificationChannel(channel)
         }
 

@@ -1,8 +1,8 @@
-# CrowdVision AI
+# AI Based Crowd Watcher for Public Safety
 
 <div align="center">
 
-![CrowdVision AI Banner](https://via.placeholder.com/1200x400?text=CrowdVision+AI+Surveillance+System)
+![AI Based Crowd Watcher for Public Safety Banner](https://via.placeholder.com/1200x400?text=CrowdVision+AI+Surveillance+System)
 
 **Next-Gen AI Powered Crowd Analysis & Public Safety System**
 
@@ -19,7 +19,7 @@
 
 ## 📖 Overview
 
-**CrowdVision AI** is an advanced, real-time surveillance ecosystem designed to enhance public safety through intelligent crowd monitoring. By integrating **Computer Vision**, **Geospatial Mapping**, and **Real-time Alerting**, it transforms standard CCTV feeds into actionable safety insights.
+**AI Based Crowd Watcher for Public Safety** is an advanced, real-time surveillance ecosystem designed to enhance public safety through intelligent crowd monitoring. By integrating **Computer Vision**, **Geospatial Mapping**, and **Real-time Alerting**, it transforms standard CCTV feeds into actionable safety insights.
 
  The system consists of three core components:
 1.  **Central Command Dashboard**: A web-based control center for monitoring, analytics, and heatmap visualization.
@@ -111,7 +111,7 @@ The system operates on a strictly defined logic to ensure consistency across the
 
 ## 🚀 Getting Started
 
-Follow these steps to set up the complete CrowdVision AI ecosystem.
+Follow these steps to set up the complete AI Based Crowd Watcher for Public Safety ecosystem.
 
 ### Prerequisites
 -   Node.js 18+ & npm/pnpm
@@ -124,7 +124,7 @@ Follow these steps to set up the complete CrowdVision AI ecosystem.
 #### 📥 Clone the Repository
 ```bash
 git clone https://github.com/yourusername/CrowdVision-AI.git
-cd CrowdVision-AI
+cd AI Based Crowd Watcher for Public Safety
 ```
 
 #### 🌐 Web Dashboard Setup
@@ -171,7 +171,7 @@ start_server.bat
 ## 📂 Project Structure
 
 ```
-CrowdVision-AI/
+AI Based Crowd Watcher for Public Safety/
 ├── app/                  # Next.js App Router (Dashboard Pages)
 ├── components/           # Reusable UI Components
 │   ├── heatmap-view.tsx  # Interactive Map Component
@@ -207,6 +207,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Contact
 
-**CrowdVision AI Team** available at [akhilkarampuri25@gmail.com](mailto:akhilkarampuri25@gmail.com)
+**AI Based Crowd Watcher for Public Safety Team** available at [akhilkarampuri25@gmail.com](mailto:akhilkarampuri25@gmail.com)
 
 > **"Empowering Safer Cities through Intelligent Vision"**

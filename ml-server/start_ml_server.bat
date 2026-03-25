@@ -1,10 +1,10 @@
 @echo off
-title CrowdVision AI - ML Server
+title AI Based Crowd Watcher for Public Safety - ML Server
 color 0B
 
 echo.
 echo ========================================
-echo    CrowdVision AI - ML Inference Server
+echo    AI Based Crowd Watcher for Public Safety - ML Inference Server
 echo ========================================
 echo.
 

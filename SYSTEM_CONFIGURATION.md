@@ -1,4 +1,4 @@
-# CrowdVision AI - System Configuration Summary
+# AI Based Crowd Watcher for Public Safety - System Configuration Summary
 
 ## 📊 Risk Thresholds
 

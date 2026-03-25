@@ -12,7 +12,7 @@ def test_ml_server():
     """Test if ML server is running and responding"""
 
     print("=" * 60)
-    print("CrowdVision AI - ML Server Test")
+    print("AI Based Crowd Watcher for Public Safety - ML Server Test")
     print("=" * 60)
     print()
 

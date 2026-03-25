@@ -247,7 +247,7 @@ def create_test_image():
         img = 255 * np.ones((640, 640, 3), dtype=np.uint8)
 
         # Add text
-        text = "CrowdVision AI Test Image"
+        text = "AI Based Crowd Watcher for Public Safety Test Image"
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(img, text, (50, 320), font, 1, (0, 0, 0), 2)
 
@@ -285,7 +285,7 @@ def main():
     """Run all tests"""
     print("\n")
     print("╔" + "=" * 58 + "╗")
-    print("║" + " " * 10 + "CrowdVision AI - ML Server Tests" + " " * 15 + "║")
+    print("║" + " " * 10 + "AI Based Crowd Watcher for Public Safety - ML Server Tests" + " " * 15 + "║")
     print("╚" + "=" * 58 + "╝")
 
     results = []

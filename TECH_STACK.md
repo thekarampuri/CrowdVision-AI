@@ -1,6 +1,6 @@
-# 🛠️ CrowdVision AI - Technical Stack Report
+# 🛠️ AI Based Crowd Watcher for Public Safety - Technical Stack Report
 
-This document provides a comprehensive breakdown of the technologies, libraries, and tools used to build the **CrowdVision AI** ecosystem.
+This document provides a comprehensive breakdown of the technologies, libraries, and tools used to build the **AI Based Crowd Watcher for Public Safety** ecosystem.
 
 ## 🌐 Frontend: Web Command Dashboard
 The central command dashboard is a modern, responsive web application built for real-time monitoring and analytics.

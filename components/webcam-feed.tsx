@@ -44,6 +44,38 @@ interface DetectionResult {
 // Global cooldown tracker to persist across component remounts
 const alertCooldowns: Record<string, number> = {};
 
+const playAlarmSound = () => {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    
+    const audioCtx = new AudioContextClass();
+    const gainNode = audioCtx.createGain();
+    const oscillator = audioCtx.createOscillator();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    oscillator.type = 'square';
+    
+    // Siren effect alternating frequencies
+    oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+    oscillator.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.5);
+    oscillator.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 1.0);
+    oscillator.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 1.5);
+    oscillator.frequency.linearRampToValueAtTime(400, audioCtx.currentTime + 2.0);
+    
+    // Volume envelope
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.0);
+    
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 2.0);
+  } catch (e) {
+    console.error("Failed to play alarm audio", e);
+  }
+};
+
 export function WebcamFeed({
   camera,
   viewMode,
@@ -274,6 +306,9 @@ export function WebcamFeed({
               console.log(
                 `[ALERT] High risk alert created with ID ${alertId} for ${camera.id} with ${result.count} people`,
               );
+
+              // Play loud alarm sound
+              playAlarmSound();
 
               // Update global throttle timestamp
               alertCooldowns[camera.id] = Date.now();

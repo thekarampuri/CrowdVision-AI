@@ -88,7 +88,7 @@ export default function AuthPage() {
                   <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 blur opacity-50 -z-10" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold text-white tracking-tight">CrowdVision AI</h1>
+                  <h1 className="text-4xl font-bold text-white tracking-tight">AI Based Crowd Watcher for Public Safety</h1>
                   <p className="text-sm text-cyan-400 font-mono">Smart Surveillance System</p>
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function AuthPage() {
                   <Scan className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">CrowdVision AI</h1>
+                  <h1 className="text-2xl font-bold text-white">AI Based Crowd Watcher for Public Safety</h1>
                   <p className="text-xs text-cyan-400 font-mono">Smart Surveillance</p>
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function AuthPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="officer@crowdvision.ai"
+                    placeholder="officer@publicsafety.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="glass border-white/20 bg-white/5 text-white placeholder:text-slate-500 focus:border-cyan-400 focus:ring-cyan-400/30 h-12"
@@ -320,7 +320,7 @@ export default function AuthPage() {
 
       {/* Bottom indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 glass rounded-full px-6 py-3 text-xs text-slate-400 font-mono">
-        Secured by CrowdVision AI • Version 1.0
+        Secured by AI Based Crowd Watcher for Public Safety • Version 1.0
       </div>
     </div>
   )

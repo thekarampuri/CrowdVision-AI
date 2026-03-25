@@ -1,4 +1,4 @@
-# CrowdVision AI - Project Structure
+# AI Based Crowd Watcher for Public Safety - Project Structure
 
 Complete documentation of the project architecture, directory organization, and file purposes.
 
@@ -7,7 +7,7 @@ Complete documentation of the project architecture, directory organization, and 
 ## 📁 Root Directory Structure
 
 ```
-CrowdVision-AI/
+AI Based Crowd Watcher for Public Safety/
 ├── app/                          # Next.js App Router pages and API routes
 ├── components/                   # React UI components
 ├── docs/                         # Project documentation
@@ -301,7 +301,7 @@ service cloud.firestore {
 ```
 
 **`lib/firebase.ts`**
-- Project ID: `crowdvision-ai-7e13f`
+- Project ID: `AI Based Crowd Watcher for Public Safety-7e13f`
 - Collections: `/alerts`, `/cameras`, `/users`
 
 ---
@@ -564,4 +564,4 @@ android/
 
 **Last Updated**: January 2024  
 **Version**: 1.0.0  
-**Maintainer**: CrowdVision AI Team
+**Maintainer**: AI Based Crowd Watcher for Public Safety Team

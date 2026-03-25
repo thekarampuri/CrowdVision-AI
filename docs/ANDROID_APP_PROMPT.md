@@ -1,13 +1,13 @@
-# Android App Generation Prompt for CrowdVision AI
+# Android App Generation Prompt for AI Based Crowd Watcher for Public Safety
 
-Use this comprehensive prompt with AI assistants (like Claude, ChatGPT, or Cursor) to generate a complete Android application for the CrowdVision AI field officer mobile app.
+Use this comprehensive prompt with AI assistants (like Claude, ChatGPT, or Cursor) to generate a complete Android application for the AI Based Crowd Watcher for Public Safety field officer mobile app.
 
 ---
 
 ## 📱 Complete Android App Generation Prompt
 
 ```
-Create a professional Android application for CrowdVision AI - a real-time crowd monitoring system for field officers and security personnel. This mobile app complements the existing web dashboard and receives real-time alerts from the Firebase backend.
+Create a professional Android application for AI Based Crowd Watcher for Public Safety - a real-time crowd monitoring system for field officers and security personnel. This mobile app complements the existing web dashboard and receives real-time alerts from the Firebase backend.
 
 ## PROJECT OVERVIEW
 
@@ -21,7 +21,7 @@ Create a professional Android application for CrowdVision AI - a real-time crowd
 ## EXISTING BACKEND INFRASTRUCTURE
 
 The app integrates with an existing system:
-- **Firebase Project ID**: crowdvision-ai-7e13f
+- **Firebase Project ID**: AI Based Crowd Watcher for Public Safety-7e13f
 - **Firestore Database**: Real-time NoSQL database
 - **Firebase Auth**: Email/password authentication
 - **ML Server**: Python Flask server at http://YOUR_SERVER_IP:5000

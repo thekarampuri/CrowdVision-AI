@@ -85,7 +85,7 @@ export default function AlertsPage() {
 
     // Header
     doc.setFontSize(20);
-    doc.text("CrowdVision AI - Alert Report", 14, 22);
+    doc.text("AI Based Crowd Watcher for Public Safety - Alert Report", 14, 22);
 
     doc.setFontSize(11);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
@@ -113,7 +113,7 @@ export default function AlertsPage() {
       }
     });
 
-    doc.save(`crowdvision-alerts-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`crowdwatcher-alerts-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const handleExportCSV = () => {
@@ -137,7 +137,7 @@ export default function AlertsPage() {
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `crowdvision-alerts-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `crowdwatcher-alerts-${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();

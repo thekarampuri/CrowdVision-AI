@@ -5,9 +5,9 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAzsjC8yn3FfKrCTOU_9UAkN9Leh8rIC7E",
-  authDomain: "crowdvision-ai-7e13f.firebaseapp.com",
-  projectId: "crowdvision-ai-7e13f",
-  storageBucket: "crowdvision-ai-7e13f.firebasestorage.app",
+  authDomain: "AI Based Crowd Watcher for Public Safety-7e13f.firebaseapp.com",
+  projectId: "AI Based Crowd Watcher for Public Safety-7e13f",
+  storageBucket: "AI Based Crowd Watcher for Public Safety-7e13f.firebasestorage.app",
   messagingSenderId: "1030038224372",
   appId: "1:1030038224372:web:aebdf076e33a1447ad4da1",
   measurementId: "G-CX55SM3ZCR"

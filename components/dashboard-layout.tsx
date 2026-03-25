@@ -76,7 +76,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <Scan className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">CrowdVision AI</h1>
+              <h1 className="text-xl font-bold text-white">AI Based Crowd Watcher for Public Safety</h1>
               <p className="text-xs text-cyan-400 font-mono">
                 Smart Surveillance
               </p>

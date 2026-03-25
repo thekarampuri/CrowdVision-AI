@@ -50,7 +50,7 @@ fun AlertListScreen(
             // Custom Header
             Spacer(modifier = Modifier.height(48.dp))
             Text(
-                text = "CrowdVision AI",
+                text = "AI Based Crowd Watcher for Public Safety",
                 color = TextWhite,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,

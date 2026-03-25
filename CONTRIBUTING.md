@@ -1,8 +1,8 @@
-# Contributing to CrowdVision AI
+# Contributing to AI Based Crowd Watcher for Public Safety
 
 First off, thanks for taking the time to contribute! 🎉
 
-The following is a set of guidelines for contributing to CrowdVision AI. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+The following is a set of guidelines for contributing to AI Based Crowd Watcher for Public Safety. These are just guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 ## 🛠️ How to Contribute
 
@@ -13,7 +13,7 @@ Fork this repository to your own GitHub account.
 Clone your fork to your local machine:
 ```bash
 git clone https://github.com/YOUR_USERNAME/CrowdVision-AI.git
-cd CrowdVision-AI
+cd AI Based Crowd Watcher for Public Safety
 ```
 
 ### 3. Create a Branch

@@ -284,7 +284,7 @@ def update_config():
 
 if __name__ == "__main__":
     logger.info("=" * 60)
-    logger.info("CrowdVision AI - ML Inference Server")
+    logger.info("AI Based Crowd Watcher for Public Safety - ML Inference Server")
     logger.info("=" * 60)
     logger.info(f"Model: {MODEL_PATH}")
     logger.info(f"Confidence Threshold: {CONFIDENCE_THRESHOLD}")

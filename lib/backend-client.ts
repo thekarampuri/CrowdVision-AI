@@ -1,7 +1,7 @@
 /**
  * Backend API Client
  * 
- * This module provides a client for communicating with the CrowdVision AI backend servers:
+ * This module provides a client for communicating with the AI Based Crowd Watcher for Public Safety backend servers:
  * - Camera Feed Server (Port 999) - WebSocket for live video streaming
  * - Data API Server (Port 666) - REST API for analytics and data
  */

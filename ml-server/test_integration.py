@@ -1,5 +1,5 @@
 """
-CrowdVision AI - End-to-End Integration Test
+AI Based Crowd Watcher for Public Safety - End-to-End Integration Test
 Tests the complete pipeline from image capture to alert generation
 """
 
@@ -70,7 +70,7 @@ class IntegrationTest:
 
     def run_all_tests(self):
         """Run all integration tests"""
-        print_header("CrowdVision AI - Integration Test Suite")
+        print_header("AI Based Crowd Watcher for Public Safety - Integration Test Suite")
         self.start_time = time.time()
 
         # Test sequence
@@ -457,7 +457,7 @@ class IntegrationTest:
         img = 255 * np.ones((640, 640, 3), dtype=np.uint8)
         cv2.putText(
             img,
-            "CrowdVision AI Integration Test",
+            "AI Based Crowd Watcher for Public Safety Integration Test",
             (50, 320),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
@@ -512,7 +512,7 @@ def main():
 {Colors.HEADER}{Colors.BOLD}
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
-║           CrowdVision AI - Integration Test Suite               ║
+║           AI Based Crowd Watcher for Public Safety - Integration Test Suite               ║
 ║                                                                  ║
 ║  This script tests the complete ML inference pipeline           ║
 ║  from image input to detection output.                          ║

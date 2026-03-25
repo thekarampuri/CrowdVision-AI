@@ -1,4 +1,4 @@
-# CrowdVision AI - ML Inference Server
+# AI Based Crowd Watcher for Public Safety - ML Inference Server
 
 Flask-based machine learning inference server for real-time crowd detection using YOLOv8.
 
@@ -268,7 +268,7 @@ def detect_gatherings(boxes, threshold=100):
 
 The Next.js API already calls this server. Verify the endpoint in:
 
-`CrowdVision-AI/app/api/detect-crowd/route.ts`
+`AI Based Crowd Watcher for Public Safety/app/api/detect-crowd/route.ts`
 
 ```typescript
 const mlResponse = await fetch("http://127.0.0.1:5000/detect", {
@@ -401,4 +401,4 @@ For issues or questions:
 
 ## 📄 License
 
-This ML server is part of the CrowdVision AI project.
+This ML server is part of the AI Based Crowd Watcher for Public Safety project.

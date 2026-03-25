@@ -10,7 +10,7 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "CrowdVision AI - AI-Powered Crowd Detection & Surveillance",
+  title: "AI Based Crowd Watcher for Public Safety - AI-Powered Crowd Detection & Surveillance",
   description:
     "Advanced crowd monitoring system with real-time YOLOv8 detection, density analysis, and geo-based heatmap visualization",
   generator: "v0.app",

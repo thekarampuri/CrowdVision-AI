@@ -2,7 +2,7 @@
 
 ## Required Files for Pre-trained Model
 
-To integrate your crowd detection model with the CrowdVision AI system, you'll need to provide the following files:
+To integrate your crowd detection model with the AI Based Crowd Watcher for Public Safety system, you'll need to provide the following files:
 
 ### 1. Model Files
 
