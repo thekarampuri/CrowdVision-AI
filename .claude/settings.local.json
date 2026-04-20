@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /e/Projects/CrowdVision-AI -type d -name *ml* -o -type d -name *model* -o -type d -name *ai* -o -type d -name *python* -o -type d -name *script* -o -type d -name *notebook*)",
+      "Bash(wc -l /e/Projects/CrowdVision-AI/app/api/detect-crowd/route.ts /e/Projects/CrowdVision-AI/app/dashboard/page.tsx /e/Projects/CrowdVision-AI/components/*.tsx)",
+      "Bash(find /e/Projects/CrowdVision-AI -maxdepth 2 -name tsconfig.json -o -name tailwind.config.* -o -name postcss.config.*)",
+      "Bash(grep -E \"\\\\.\\(py|json|txt|yml|yaml\\)$\")",
+      "Bash(grep -r \"localhost:5000\\\\|127.0.0.1:5000\" /e/Projects/CrowdVision-AI/app /e/Projects/CrowdVision-AI/components --include=*.ts --include=*.tsx)"
+    ]
+  }
+}

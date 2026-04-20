@@ -41,16 +41,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import com.tricommits.crowdvisionmobile.data.SOSMetrics
 import com.tricommits.crowdvisionmobile.ui.alert.Alert
 import com.tricommits.crowdvisionmobile.ui.alert.RiskLevelBadge
 import com.tricommits.crowdvisionmobile.ui.alert.StatusBadge
 import com.tricommits.crowdvisionmobile.ui.theme.CrowdVisionMobileTheme
+import com.tricommits.crowdvisionmobile.viewmodel.AlertViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun MapScreen(
     alert: Alert,
+    viewModel: AlertViewModel,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -147,7 +155,7 @@ fun MapScreen(
                 ) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text("Performance Metrics", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        Divider(color = Color.White.copy(alpha = 0.1f))
+                        HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
                         
                         AverageMetricItem("Avg. Assign", formatDuration(stats.avgTimeToAssign))
                         AverageMetricItem("Avg. Reach", formatDuration(stats.avgTimeToReach))
@@ -157,30 +165,35 @@ fun MapScreen(
             }
 
             // Floating UI elements (FABs)
-                    FloatingActionButton(
-                        onClick = { webView.evaluateJavascript("zoomIn()", null) },
-                        shape = CircleShape,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Zoom In")
-                    }
-                    Spacer(modifier = Modifier.padding(8.dp))
-                    FloatingActionButton(
-                        onClick = { webView.evaluateJavascript("zoomOut()", null) },
-                        shape = CircleShape,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
-                    }
-                    Spacer(modifier = Modifier.padding(8.dp))
-                    FloatingActionButton(
-                        onClick = { webView.evaluateJavascript("centerMap(${alert.latitude}, ${alert.longitude})", null) },
-                        shape = CircleShape,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(Icons.Default.MyLocation, contentDescription = "Center Map")
-                    }
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .padding(bottom = 120.dp)
+                    .align(Alignment.BottomEnd),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FloatingActionButton(
+                    onClick = { webView.evaluateJavascript("zoomIn()", null) },
+                    shape = CircleShape,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Zoom In")
                 }
+                FloatingActionButton(
+                    onClick = { webView.evaluateJavascript("zoomOut()", null) },
+                    shape = CircleShape,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Remove, contentDescription = "Zoom Out")
+                }
+                FloatingActionButton(
+                    onClick = { webView.evaluateJavascript("centerMap(${alert.latitude}, ${alert.longitude})", null) },
+                    shape = CircleShape,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.MyLocation, contentDescription = "Center Map")
+                }
+            }
 
                 // Info Card at the bottom
                 Card(
@@ -208,8 +221,25 @@ fun MapScreen(
                     }
                 }
             }
-        }
     }
+}
+
+@Composable
+fun AverageMetricItem(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, color = Color.LightGray, fontSize = 10.sp)
+        Text(value, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Medium)
+    }
+}
+
+private fun formatDuration(millis: Long): String {
+    if (millis <= 0) return "N/A"
+    val seconds = (millis / 1000) % 60
+    val minutes = (millis / (1000 * 60)) % 60
+    return if (minutes > 0) "${minutes}m ${seconds}s" else "${seconds}s"
 }
 
 @Preview(showBackground = true)
@@ -226,6 +256,6 @@ fun MapScreenPreview() {
             latitude = 40.7128,
             longitude = -74.0060
         )
-        MapScreen(alert = sampleAlert, onBack = {})
+        MapScreen(alert = sampleAlert, viewModel = viewModel(), onBack = {})
     }
 }

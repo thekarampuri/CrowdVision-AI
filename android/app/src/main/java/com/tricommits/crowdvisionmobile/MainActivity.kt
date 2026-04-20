@@ -166,6 +166,7 @@ fun CrowdVisionNavHost() {
             if (alert != null) {
                 MapScreen(
                     alert = alert,
+                    viewModel = alertViewModel,
                     onBack = { navController.popBackStack() }
                 )
             }

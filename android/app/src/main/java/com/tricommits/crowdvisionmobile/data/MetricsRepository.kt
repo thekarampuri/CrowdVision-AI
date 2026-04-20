@@ -17,7 +17,8 @@ data class SOSMetrics(
 
 class MetricsRepository {
 
-    private val database = FirebaseDatabase.getInstance()
+    // Fix: Explicitly providing the database URL to avoid issues with spaces in the project name/ID from google-services.json
+    private val database = FirebaseDatabase.getInstance("https://ai-based-crowd-watcher-for-7e13f-default-rtdb.firebaseio.com/")
     private val activeMetricsRef = database.getReference("sos_metrics/active")
     private val analyticsRef = database.getReference("sos_metrics/analytics")
     private val globalStatsRef = database.getReference("sos_metrics/global_stats")
